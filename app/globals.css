@@ -5,18 +5,47 @@
   box-sizing: border-box;
 }
 
-/* === ערכת כהה (ברירת מחדל) — צבעי האתר האמיתיים === */
+/* === ערכה בהירה (ברירת מחדל) === */
 :root {
-  --bg: #081B1D;         /* רקע כהה מהאתר */
+  --bg: #f8f5ef;
+  --bg-2: #f0ece3;
+  --card: #ffffff;
+  --line: rgba(8, 27, 29, 0.12);
+  --text: #1a2420;
+  --muted: #5a7a70;
+  --accent: #6e8478;
+  --accent-2: #8fa89f;
+  --gold: #b8920e;
+  --amber: #8B4708;
+  --green: #1aa34a;
+
+  --surface: #ffffff;
+  --surface-2: #edeae2;
+  --card-a: #ffffff;
+  --card-b: #f5f2eb;
+  --line-soft: rgba(8, 27, 29, 0.06);
+  --line-strong: rgba(8, 27, 29, 0.22);
+  --hover: rgba(110, 132, 120, 0.08);
+  --hover-2: rgba(110, 132, 120, 0.13);
+  --hover-soft: rgba(110, 132, 120, 0.04);
+  --spin-track: rgba(8, 27, 29, 0.18);
+  --spin-head: var(--accent);
+  --shadow: rgba(8, 27, 29, 0.1);
+  --glow: rgba(110, 132, 120, 0.06);
+}
+
+/* === ערכת כהה — רק אם המשתמש בחר === */
+:root[data-theme="dark"] {
+  --bg: #081B1D;
   --bg-2: #0e2326;
   --card: #132c30;
   --line: rgba(110, 132, 120, 0.18);
   --text: #f0ede6;
   --muted: #9ab4ac;
-  --accent: #6e8478;     /* ירוק-מרווה — צבע המותג הראשי */
-  --accent-2: #8fa89f;   /* ירוק בהיר */
-  --gold: #EBD378;       /* זהב מהאתר */
-  --amber: #8B4708;      /* ענבר/חום */
+  --accent: #6e8478;
+  --accent-2: #8fa89f;
+  --gold: #EBD378;
+  --amber: #8B4708;
   --green: #25d366;
 
   --surface: #0b2225;
@@ -32,35 +61,6 @@
   --spin-head: #f0ede6;
   --shadow: rgba(0, 0, 0, 0.55);
   --glow: rgba(110, 132, 120, 0.15);
-}
-
-/* === ערכה בהירה === */
-:root[data-theme="light"] {
-  --bg: #f5f2eb;
-  --bg-2: #eceae2;
-  --card: #ffffff;
-  --line: rgba(8, 27, 29, 0.12);
-  --text: #081B1D;
-  --muted: #4a6b65;
-  --accent: #6e8478;
-  --accent-2: #8fa89f;
-  --gold: #C19E18;
-  --amber: #8B4708;
-  --green: #1aa34a;
-
-  --surface: #ffffff;
-  --surface-2: #e4e8e5;
-  --card-a: #ffffff;
-  --card-b: #f8f6ef;
-  --line-soft: rgba(8, 27, 29, 0.06);
-  --line-strong: rgba(8, 27, 29, 0.25);
-  --hover: rgba(8, 27, 29, 0.04);
-  --hover-2: rgba(8, 27, 29, 0.07);
-  --hover-soft: rgba(8, 27, 29, 0.03);
-  --spin-track: rgba(8, 27, 29, 0.18);
-  --spin-head: var(--accent);
-  --shadow: rgba(8, 27, 29, 0.14);
-  --glow: rgba(110, 132, 120, 0.08);
 }
 
 html,
@@ -98,8 +98,8 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: linear-gradient(90deg, #081B1D, #6e8478);
-  color: #f0ede6;
+  background: linear-gradient(90deg, #6e8478, #8B4708);
+  color: #fff;
   font-weight: 700;
   font-size: 14px;
   letter-spacing: 0.5px;
@@ -130,12 +130,12 @@ body {
 
 /* === CARD === */
 .pcf-card {
-  background: linear-gradient(180deg, var(--card-a) 0%, var(--card-b) 100%);
+  background: var(--card);
   border: 1px solid var(--line);
   border-radius: 20px;
   padding: 26px 22px;
   margin: 22px auto 0;
-  box-shadow: 0 16px 40px var(--shadow);
+  box-shadow: 0 2px 8px var(--shadow);
 }
 
 .pcf-card h2 {
@@ -282,8 +282,8 @@ body {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  background: linear-gradient(135deg, #6e8478, #8B4708);
-  color: #f0ede6;
+  background: linear-gradient(135deg, #6e8478, #5a6e65);
+  color: #fff;
   font-weight: 700;
   font-size: 17px;
   font-family: inherit;
@@ -527,7 +527,7 @@ body {
   align-items: center;
   gap: 6px;
   flex-wrap: wrap;
-  background: var(--bg-2);
+  background: var(--surface-2);
   border: 1px solid var(--line);
   border-radius: 14px;
   padding: 6px;
@@ -565,8 +565,8 @@ button.pcf-topnav-item {
   background: var(--hover);
 }
 .pcf-topnav-item.active {
+  background: var(--accent);
   color: #fff;
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
 }
 
 .pcf-icon-btn {
@@ -732,7 +732,8 @@ button.pcf-topnav-item {
 .pcf-table thead th {
   text-align: right;
   padding: 12px 16px;
-  color: var(--muted);
+  background: var(--surface-2);
+  color: var(--text);
   font-weight: 700;
   font-size: 13px;
   border-bottom: 1px solid var(--line);
@@ -749,8 +750,8 @@ button.pcf-topnav-item {
   transition: background 0.12s;
 }
 
-.pcf-table tbody tr:hover {
-  background: var(--hover-soft);
+.pcf-table tbody tr:hover td {
+  background: rgba(110,132,120,0.06);
 }
 
 .pcf-table.answers tbody tr {
@@ -940,8 +941,9 @@ button.pcf-topnav-item {
   }
 }
 
-/* בורר התאריך לא הפוך בערכה הבהירה */
-:root[data-theme="light"] { --picker-filter: none; }
+/* בורר התאריך לא הפוך בערכה הבהירה (ברירת מחדל) */
+:root { --picker-filter: none; }
+:root[data-theme="dark"] { --picker-filter: invert(0.8); }
 
 /* לוחות האדמין — רחבים בדסקטופ (הטבלאות צריכות מקום) */
 @media (min-width: 1100px) {

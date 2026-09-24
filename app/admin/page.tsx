@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { onAuthStateChanged, signInWithPopup, setPersistence, browserLocalPersistence, signOut, firebaseAuth, googleProvider, type User } from "@/lib/authClient";
 import AdminNav from "./AdminNav";
 
@@ -22,6 +22,21 @@ const STATUS_LABELS: Record<string, { label: string; color: string; bg: string }
 
 const STATUSES = Object.keys(STATUS_LABELS);
 
+const COLUMN_DEFS = [
+  { key: "full_name",            label: "שם",              default: true  },
+  { key: "phone",                label: "טלפון",           default: true  },
+  { key: "email",                label: "מייל",            default: true  },
+  { key: "status",               label: "סטטוס",           default: true  },
+  { key: "source",               label: "מקור",            default: true  },
+  { key: "last_call",            label: "שיחה אחרונה",     default: true  },
+  { key: "notes_rep1",           label: "הערות ליהי",      default: false },
+  { key: "notes_rep2",           label: "הערות שיר",       default: false },
+  { key: "gender",               label: "מגדר",            default: false },
+  { key: "filled_questionnaire", label: "שאלון",           default: false },
+  { key: "open_day",             label: "יום פתוח",        default: false },
+  { key: "created_at",           label: "נוצר",            default: false },
+];
+
 interface Lead {
   id: string;
   status: string;
@@ -32,6 +47,13 @@ interface Lead {
   phone: string;
   email: string;
   source: string;
+  gender: string;
+  last_call: string;
+  notes_rep1: string;
+  notes_rep2: string;
+  filled_questionnaire: boolean;
+  open_day: string;
+  landing_page: string;
   created_at: string;
   updated_at: string;
   last_activity_at: string;
@@ -41,6 +63,34 @@ function fmtDate(s: string): string {
   if (!s) return "—";
   try { return new Date(s).toLocaleString("he-IL", { timeZone: "Asia/Jerusalem", dateStyle: "short", timeStyle: "short" }); }
   catch { return s; }
+}
+
+function getCellValue(lead: Lead, key: string): string {
+  switch (key) {
+    case "full_name":            return lead.full_name || "(ללא שם)";
+    case "phone":                return lead.phone || "—";
+    case "email":                return lead.email || "—";
+    case "status":               return STATUS_LABELS[lead.status]?.label || lead.status || "—";
+    case "source":               return lead.source || "—";
+    case "last_call":            return lead.last_call ? fmtDate(lead.last_call) : "—";
+    case "notes_rep1":           return lead.notes_rep1 || "—";
+    case "notes_rep2":           return lead.notes_rep2 || "—";
+    case "gender":               return lead.gender || "—";
+    case "filled_questionnaire": return lead.filled_questionnaire ? "כן" : "לא";
+    case "open_day":             return lead.open_day || "—";
+    case "created_at":           return fmtDate(lead.created_at);
+    default:                     return "—";
+  }
+}
+
+const LS_KEY = "tattoostory_crm_columns";
+
+function loadCols(): Record<string, boolean> {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  return Object.fromEntries(COLUMN_DEFS.map((c) => [c.key, c.default]));
 }
 
 export default function AdminLeads() {
@@ -62,6 +112,31 @@ export default function AdminLeads() {
   const [showAdd, setShowAdd] = useState(false);
   const [newLead, setNewLead] = useState({ first_name: "", last_name: "", phone: "", email: "", source: "" });
   const [addBusy, setAddBusy] = useState(false);
+
+  const [visibleCols, setVisibleCols] = useState<Record<string, boolean>>(() => {
+    if (typeof window !== "undefined") return loadCols();
+    return Object.fromEntries(COLUMN_DEFS.map((c) => [c.key, c.default]));
+  });
+  const [showColPicker, setShowColPicker] = useState(false);
+  const colPickerRef = useRef<HTMLDivElement>(null);
+
+  const [colFilters, setColFilters] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    if (typeof window !== "undefined") setVisibleCols(loadCols());
+  }, []);
+
+  useEffect(() => {
+    try { localStorage.setItem(LS_KEY, JSON.stringify(visibleCols)); } catch {}
+  }, [visibleCols]);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (colPickerRef.current && !colPickerRef.current.contains(e.target as Node)) setShowColPicker(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
 
   useEffect(() => onAuthStateChanged(firebaseAuth(), (u) => { setUser(u); setAuthReady(true); }), []);
 
@@ -135,6 +210,19 @@ export default function AdminLeads() {
 
   const allCount = useMemo(() => Object.values(statusCounts).reduce((a, b) => a + b, 0), [statusCounts]);
 
+  const activeCols = COLUMN_DEFS.filter((c) => visibleCols[c.key]);
+
+  const filteredLeads = useMemo(() => {
+    if (!Object.values(colFilters).some(Boolean)) return leads;
+    return leads.filter((lead) =>
+      activeCols.every((col) => {
+        const f = colFilters[col.key];
+        if (!f) return true;
+        return getCellValue(lead, col.key).toLowerCase().includes(f.toLowerCase());
+      })
+    );
+  }, [leads, colFilters, activeCols]);
+
   if (!authReady) return (
     <main style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh" }}>
       <div className="pcf-spin" />
@@ -184,8 +272,42 @@ export default function AdminLeads() {
           <span className="pcf-badge">Tattoo Story Academy</span>
           <h1 style={{ fontSize: 26, margin: "10px 0 0", fontWeight: 800 }}>לידים</h1>
         </div>
-        <div className="pcf-user" style={{ display: "flex", gap: 12, alignItems: "center" }}>
+        <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
           <button className="pcf-btn" style={{ padding: "8px 16px", fontSize: 14 }} onClick={() => setShowAdd(true)}>+ ליד חדש</button>
+
+          {/* כפתור עמודות */}
+          <div ref={colPickerRef} style={{ position: "relative" }}>
+            <button
+              className="pcf-btn ghost"
+              style={{ padding: "8px 14px", fontSize: 14 }}
+              onClick={() => setShowColPicker((v) => !v)}
+            >
+              עמודות ▾
+            </button>
+            {showColPicker && (
+              <div style={{
+                position: "absolute", top: "calc(100% + 6px)", left: 0, zIndex: 50,
+                background: "var(--card)", border: "1px solid var(--line)", borderRadius: 12,
+                padding: "10px 0", minWidth: 180,
+                boxShadow: "0 8px 24px var(--shadow)",
+              }}>
+                {COLUMN_DEFS.map((col) => (
+                  <label key={col.key} style={{
+                    display: "flex", alignItems: "center", gap: 10,
+                    padding: "8px 16px", cursor: "pointer", fontSize: 14,
+                  }}>
+                    <input
+                      type="checkbox"
+                      checked={!!visibleCols[col.key]}
+                      onChange={(e) => setVisibleCols((v) => ({ ...v, [col.key]: e.target.checked }))}
+                    />
+                    {col.label}
+                  </label>
+                ))}
+              </div>
+            )}
+          </div>
+
           <span style={{ color: "var(--muted)", fontSize: 14 }}>{user.email}</span>
           <button className="pcf-link-btn" onClick={() => signOut(firebaseAuth())}>יציאה</button>
         </div>
@@ -206,7 +328,6 @@ export default function AdminLeads() {
       {/* חיפוש */}
       <div style={{ marginBottom: 14 }}>
         <input
-          className="pcf-search"
           placeholder="חיפוש לפי שם, טלפון או מייל..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -219,50 +340,67 @@ export default function AdminLeads() {
       {!loading && (
         <div className="pcf-card" style={{ padding: 0, overflow: "hidden" }}>
           <div className="pcf-admin-tabhead">
-            {total} לידים{leads.length !== total ? ` (מציג ${leads.length})` : ""}
+            {total} לידים{filteredLeads.length !== total ? ` (מציג ${filteredLeads.length})` : ""}
           </div>
           <div style={{ overflowX: "auto" }}>
             <table className="pcf-table pcf-leads-table">
               <thead>
                 <tr>
-                  <th>שם</th>
-                  <th>טלפון</th>
-                  <th>מייל</th>
-                  <th>סטטוס</th>
-                  <th>מקור</th>
-                  <th>נוצר</th>
-                  <th>עדכון</th>
+                  {activeCols.map((col) => <th key={col.key}>{col.label}</th>)}
+                </tr>
+                {/* שורת פילטר */}
+                <tr className="pcf-filter-row">
+                  {activeCols.map((col) => (
+                    <th key={col.key}>
+                      <input
+                        placeholder="סינון..."
+                        value={colFilters[col.key] || ""}
+                        onChange={(e) => setColFilters((f) => ({ ...f, [col.key]: e.target.value }))}
+                      />
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
-                {leads.map((l) => (
+                {filteredLeads.map((l) => (
                   <tr key={l.id} style={{ cursor: "pointer" }} onClick={() => (window.location.href = `/admin/leads/${l.id}`)}>
-                    <td><b>{l.full_name || "(ללא שם)"}</b></td>
-                    <td dir="ltr" style={{ textAlign: "right" }}>{l.phone || "—"}</td>
-                    <td dir="ltr" style={{ textAlign: "right", fontSize: 13 }}>{l.email || "—"}</td>
-                    <td onClick={(e) => e.stopPropagation()}>
-                      <select
-                        value={l.status}
-                        disabled={savingId === l.id}
-                        onChange={(e) => changeStatus(l.id, e.target.value)}
-                        style={{
-                          padding: "4px 8px", borderRadius: 8, border: "1px solid var(--line)",
-                          background: STATUS_LABELS[l.status]?.bg || "var(--surface)",
-                          color: STATUS_LABELS[l.status]?.color || "var(--text)",
-                          fontWeight: 600, fontSize: 13, cursor: "pointer", fontFamily: "inherit",
-                        }}
-                      >
-                        {STATUSES.map((s) => <option key={s} value={s}>{STATUS_LABELS[s]?.label || s}</option>)}
-                        {!STATUS_LABELS[l.status] && <option value={l.status}>{l.status}</option>}
-                      </select>
-                    </td>
-                    <td style={{ fontSize: 13, color: "var(--muted)" }}>{l.source || "—"}</td>
-                    <td style={{ fontSize: 13, color: "var(--muted)", whiteSpace: "nowrap" }}>{fmtDate(l.created_at)}</td>
-                    <td style={{ fontSize: 13, color: "var(--muted)", whiteSpace: "nowrap" }}>{fmtDate(l.updated_at)}</td>
+                    {activeCols.map((col) => {
+                      if (col.key === "status") return (
+                        <td key="status" onClick={(e) => e.stopPropagation()}>
+                          <select
+                            value={l.status}
+                            disabled={savingId === l.id}
+                            onChange={(e) => changeStatus(l.id, e.target.value)}
+                            style={{
+                              padding: "4px 8px", borderRadius: 8, border: "1px solid var(--line)",
+                              background: STATUS_LABELS[l.status]?.bg || "var(--surface)",
+                              color: STATUS_LABELS[l.status]?.color || "var(--text)",
+                              fontWeight: 600, fontSize: 13, cursor: "pointer", fontFamily: "inherit",
+                            }}
+                          >
+                            {STATUSES.map((s) => <option key={s} value={s}>{STATUS_LABELS[s]?.label || s}</option>)}
+                            {!STATUS_LABELS[l.status] && <option value={l.status}>{l.status}</option>}
+                          </select>
+                        </td>
+                      );
+                      if (col.key === "phone" || col.key === "email") return (
+                        <td key={col.key} dir="ltr" style={{ textAlign: "right", fontSize: col.key === "email" ? 13 : undefined }}>
+                          {getCellValue(l, col.key)}
+                        </td>
+                      );
+                      if (col.key === "full_name") return (
+                        <td key="full_name"><b>{getCellValue(l, "full_name")}</b></td>
+                      );
+                      return (
+                        <td key={col.key} style={{ fontSize: 13, color: "var(--muted)", whiteSpace: ["last_call", "created_at"].includes(col.key) ? "nowrap" : undefined }}>
+                          {getCellValue(l, col.key)}
+                        </td>
+                      );
+                    })}
                   </tr>
                 ))}
-                {leads.length === 0 && (
-                  <tr><td colSpan={7} style={{ textAlign: "center", padding: 40, color: "var(--muted)" }}>אין לידים תואמים</td></tr>
+                {filteredLeads.length === 0 && (
+                  <tr><td colSpan={activeCols.length} style={{ textAlign: "center", padding: 40, color: "var(--muted)" }}>אין לידים תואמים</td></tr>
                 )}
               </tbody>
             </table>

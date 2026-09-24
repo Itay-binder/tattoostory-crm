@@ -20,8 +20,9 @@ export async function GET(req: Request) {
   let query = supa()
     .from("leads")
     .select(`
-      id, status, stage, created_at, updated_at, last_activity_at,
-      contacts ( id, first_name, last_name, phone, email, source, created_at )
+      id, status, created_at, updated_at, last_activity_at,
+      last_call, notes_rep1, notes_rep2, filled_questionnaire, open_day,
+      contacts ( id, first_name, last_name, phone, email, source, gender, landing_page )
     `, { count: "exact" });
 
   if (statusFilter !== "all") query = query.eq("status", statusFilter);
@@ -37,10 +38,14 @@ export async function GET(req: Request) {
     return {
       id: r.id,
       status: r.status,
-      stage: r.stage,
       created_at: r.created_at,
       updated_at: r.updated_at,
       last_activity_at: r.last_activity_at,
+      last_call: r.last_call || "",
+      notes_rep1: r.notes_rep1 || "",
+      notes_rep2: r.notes_rep2 || "",
+      filled_questionnaire: r.filled_questionnaire || false,
+      open_day: r.open_day || "",
       contact_id: c?.id || "",
       first_name: c?.first_name || "",
       last_name: c?.last_name || "",
@@ -48,6 +53,8 @@ export async function GET(req: Request) {
       phone: c?.phone || "",
       email: c?.email || "",
       source: c?.source || "",
+      gender: c?.gender || "",
+      landing_page: c?.landing_page || "",
     };
   });
 

@@ -7,9 +7,10 @@ import { onAuthStateChanged, firebaseAuth } from "@/lib/authClient";
 
 const TABS = [
   { href: "/admin/dashboard", label: "דשבורד", icon: "📊", countKey: "", match: (p: string) => p.startsWith("/admin/dashboard") },
-  { href: "/admin", label: "לידים", icon: "🎯", countKey: "leads", match: (p: string) => p === "/admin" || (p.startsWith("/admin/leads") && !p.startsWith("/admin/meetings") && !p.startsWith("/admin/customers") && !p.startsWith("/admin/settings") && !p.startsWith("/admin/dashboard")) },
+  { href: "/admin", label: "לידים", icon: "🎯", countKey: "leads", match: (p: string) => p === "/admin" || (p.startsWith("/admin/leads") && !p.startsWith("/admin/meetings") && !p.startsWith("/admin/customers") && !p.startsWith("/admin/settings") && !p.startsWith("/admin/dashboard") && !p.startsWith("/admin/whatsapp")) },
   { href: "/admin/meetings", label: "פגישות התאמה", icon: "📆", countKey: "meetings", match: (p: string) => p.startsWith("/admin/meetings") },
   { href: "/admin/customers", label: "לקוחות", icon: "👤", countKey: "customers", match: (p: string) => p.startsWith("/admin/customers") },
+  { href: "/admin/whatsapp", label: "ווצאפ", icon: "💬", countKey: "", match: (p: string) => p.startsWith("/admin/whatsapp") },
   { href: "/admin/settings", label: "הגדרות", icon: "⚙️", countKey: "", match: (p: string) => p.startsWith("/admin/settings") },
 ];
 

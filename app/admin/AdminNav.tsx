@@ -5,13 +5,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { onAuthStateChanged, firebaseAuth } from "@/lib/authClient";
 
-const OTHER_PREFIXES = ["/admin/contacts", "/admin/cycles", "/admin/enrollments", "/admin/settings"];
-
 const TABS = [
-  { href: "/admin", label: "לידים", icon: "🎯", countKey: "leads", match: (p: string) => p === "/admin" || (p.startsWith("/admin/leads") ?? false) || (!OTHER_PREFIXES.some((pre) => p.startsWith(pre)) && p.startsWith("/admin/") && !p.startsWith("/admin/contacts") && !p.startsWith("/admin/cycles") && !p.startsWith("/admin/enrollments") && !p.startsWith("/admin/settings")) },
-  { href: "/admin/contacts", label: "אנשי קשר", icon: "👤", countKey: "contacts", match: (p: string) => p.startsWith("/admin/contacts") },
-  { href: "/admin/cycles", label: "מחזורים", icon: "📅", countKey: "cycles", match: (p: string) => p.startsWith("/admin/cycles") },
-  { href: "/admin/enrollments", label: "רשומים", icon: "🎓", countKey: "enrollments", match: (p: string) => p.startsWith("/admin/enrollments") },
+  { href: "/admin/dashboard", label: "דשבורד", icon: "📊", countKey: "", match: (p: string) => p.startsWith("/admin/dashboard") },
+  { href: "/admin", label: "לידים", icon: "🎯", countKey: "leads", match: (p: string) => p === "/admin" || (p.startsWith("/admin/leads") && !p.startsWith("/admin/meetings") && !p.startsWith("/admin/customers") && !p.startsWith("/admin/settings") && !p.startsWith("/admin/dashboard")) },
+  { href: "/admin/meetings", label: "פגישות התאמה", icon: "📆", countKey: "meetings", match: (p: string) => p.startsWith("/admin/meetings") },
+  { href: "/admin/customers", label: "לקוחות", icon: "👤", countKey: "customers", match: (p: string) => p.startsWith("/admin/customers") },
   { href: "/admin/settings", label: "הגדרות", icon: "⚙️", countKey: "", match: (p: string) => p.startsWith("/admin/settings") },
 ];
 
@@ -33,6 +31,13 @@ export default function AdminNav() {
 
   return (
     <nav className="pcf-topnav">
+      <div className="pcf-topnav-logo">
+        <img
+          src="https://tattoostoryacademy.com/wp-content/uploads/2025/03/black_logo.png"
+          alt="Tattoo Story Academy"
+          style={{ height: 32, objectFit: "contain", filter: "brightness(0) invert(1)" }}
+        />
+      </div>
       {TABS.map((t) => {
         const active = t.match(pathname);
         const c = t.countKey ? counts[t.countKey] : undefined;

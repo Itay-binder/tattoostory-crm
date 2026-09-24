@@ -1,8 +1,11 @@
 import type { Metadata, Viewport } from "next";
-import { Rubik } from "next/font/google";
+import { IBM_Plex_Sans_Hebrew } from "next/font/google";
 import "./globals.css";
 
-const rubik = Rubik({ subsets: ["hebrew", "latin"], weight: ["400", "500", "600", "700", "800"] });
+const ibm = IBM_Plex_Sans_Hebrew({
+  subsets: ["hebrew", "latin"],
+  weight: ["300", "400", "500", "600", "700"],
+});
 
 export const metadata: Metadata = {
   title: "Tattoo Story Academy — CRM",
@@ -13,13 +16,13 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#4f342a",
+  themeColor: "#081B1D",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="he" dir="rtl">
-      <body className={rubik.className}>{children}</body>
+      <body className={ibm.className}>{children}</body>
     </html>
   );
 }

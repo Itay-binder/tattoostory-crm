@@ -1,64 +1,66 @@
-/* === שפת העיצוב של Tattoo Story Academy CRM === */
+/* === Tattoo Story Academy CRM — Design System === */
 *,
 *::before,
 *::after {
   box-sizing: border-box;
 }
 
-/* === ערכת כהה (ברירת מחדל) === */
+/* === ערכת כהה (ברירת מחדל) — צבעי האתר האמיתיים === */
 :root {
-  --bg: #1e1210;
-  --bg-2: #271614;
-  --card: #321c18;
-  --line: rgba(255, 220, 190, 0.1);
-  --text: #f5ede8;
-  --muted: #c4a899;
-  --accent: #b0541e;
-  --accent-2: #c8835a;
-  --gold: #d4a853;
+  --bg: #081B1D;         /* רקע כהה מהאתר */
+  --bg-2: #0e2326;
+  --card: #132c30;
+  --line: rgba(110, 132, 120, 0.18);
+  --text: #f0ede6;
+  --muted: #9ab4ac;
+  --accent: #6e8478;     /* ירוק-מרווה — צבע המותג הראשי */
+  --accent-2: #8fa89f;   /* ירוק בהיר */
+  --gold: #EBD378;       /* זהב מהאתר */
+  --amber: #8B4708;      /* ענבר/חום */
   --green: #25d366;
 
-  --surface: #2a1612;
-  --surface-2: #3e2218;
-  --card-a: #351e18;
-  --card-b: #281410;
-  --line-soft: rgba(255, 220, 190, 0.05);
-  --line-strong: rgba(255, 220, 190, 0.25);
-  --hover: rgba(255, 220, 190, 0.05);
-  --hover-2: rgba(255, 220, 190, 0.08);
-  --hover-soft: rgba(255, 220, 190, 0.03);
-  --spin-track: rgba(255, 220, 190, 0.3);
-  --spin-head: #f5ede8;
-  --shadow: rgba(0, 0, 0, 0.5);
-  --glow: rgba(176, 84, 30, 0.2);
+  --surface: #0b2225;
+  --surface-2: #1a3538;
+  --card-a: #152f32;
+  --card-b: #0e2326;
+  --line-soft: rgba(110, 132, 120, 0.07);
+  --line-strong: rgba(110, 132, 120, 0.3);
+  --hover: rgba(110, 132, 120, 0.06);
+  --hover-2: rgba(110, 132, 120, 0.1);
+  --hover-soft: rgba(110, 132, 120, 0.04);
+  --spin-track: rgba(110, 132, 120, 0.3);
+  --spin-head: #f0ede6;
+  --shadow: rgba(0, 0, 0, 0.55);
+  --glow: rgba(110, 132, 120, 0.15);
 }
 
-/* === ערכה בהירה (ארצי-חום בהיר) === */
+/* === ערכה בהירה === */
 :root[data-theme="light"] {
-  --bg: #f2e8de;
-  --bg-2: #e9dcd1;
-  --card: #fff9f5;
-  --line: rgba(79, 52, 42, 0.14);
-  --text: #3b2a22;
-  --muted: #7a5c50;
-  --accent: #b0541e;
-  --accent-2: #c8835a;
-  --gold: #b8860b;
+  --bg: #f5f2eb;
+  --bg-2: #eceae2;
+  --card: #ffffff;
+  --line: rgba(8, 27, 29, 0.12);
+  --text: #081B1D;
+  --muted: #4a6b65;
+  --accent: #6e8478;
+  --accent-2: #8fa89f;
+  --gold: #C19E18;
+  --amber: #8B4708;
   --green: #1aa34a;
 
-  --surface: #fff9f5;
-  --surface-2: #edddd3;
+  --surface: #ffffff;
+  --surface-2: #e4e8e5;
   --card-a: #ffffff;
-  --card-b: #fdf5ef;
-  --line-soft: rgba(79, 52, 42, 0.07);
-  --line-strong: rgba(79, 52, 42, 0.3);
-  --hover: rgba(79, 52, 42, 0.05);
-  --hover-2: rgba(79, 52, 42, 0.08);
-  --hover-soft: rgba(79, 52, 42, 0.03);
-  --spin-track: rgba(79, 52, 42, 0.18);
+  --card-b: #f8f6ef;
+  --line-soft: rgba(8, 27, 29, 0.06);
+  --line-strong: rgba(8, 27, 29, 0.25);
+  --hover: rgba(8, 27, 29, 0.04);
+  --hover-2: rgba(8, 27, 29, 0.07);
+  --hover-soft: rgba(8, 27, 29, 0.03);
+  --spin-track: rgba(8, 27, 29, 0.18);
   --spin-head: var(--accent);
-  --shadow: rgba(79, 52, 42, 0.15);
-  --glow: rgba(176, 84, 30, 0.08);
+  --shadow: rgba(8, 27, 29, 0.14);
+  --glow: rgba(110, 132, 120, 0.08);
 }
 
 html,
@@ -96,14 +98,14 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: linear-gradient(90deg, #4f342a, #b0541e);
-  color: #f5ede8;
-  font-weight: 800;
+  background: linear-gradient(90deg, #081B1D, #6e8478);
+  color: #f0ede6;
+  font-weight: 700;
   font-size: 14px;
   letter-spacing: 0.5px;
   padding: 6px 14px;
   border-radius: 999px;
-  box-shadow: 0 8px 24px rgba(176, 84, 30, 0.35);
+  box-shadow: 0 8px 24px rgba(110, 132, 120, 0.35);
 }
 
 .pcf-hero h1 {
@@ -168,7 +170,7 @@ body {
 }
 
 .pcf-progress span.done {
-  background: linear-gradient(90deg, #b0541e, #c8835a);
+  background: linear-gradient(90deg, #6e8478, #EBD378);
   border-color: transparent;
 }
 
@@ -230,7 +232,7 @@ body {
 .pcf-field select:focus,
 .pcf-field textarea:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(255, 59, 59, 0.18);
+  box-shadow: 0 0 0 3px rgba(110, 132, 120, 0.25);
 }
 
 .pcf-field input::-webkit-calendar-picker-indicator {
@@ -257,11 +259,11 @@ body {
 }
 
 .pcf-pill:hover {
-  border-color: rgba(176, 84, 30, 0.4);
+  border-color: rgba(110, 132, 120, 0.5);
 }
 
 .pcf-pill.active {
-  background: linear-gradient(90deg, rgba(176, 84, 30, 0.18), rgba(200, 131, 90, 0.18));
+  background: linear-gradient(90deg, rgba(110, 132, 120, 0.2), rgba(235, 211, 120, 0.15));
   border-color: var(--accent);
   color: var(--text);
 }
@@ -280,23 +282,23 @@ body {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  background: linear-gradient(90deg, #ff1f1f, #ff7a3b);
-  color: #fff;
-  font-weight: 900;
+  background: linear-gradient(135deg, #6e8478, #8B4708);
+  color: #f0ede6;
+  font-weight: 700;
   font-size: 17px;
   font-family: inherit;
   padding: 14px 26px;
   border: 0;
-  border-radius: 14px;
+  border-radius: 10px;
   cursor: pointer;
   text-decoration: none;
-  box-shadow: 0 14px 36px rgba(255, 31, 31, 0.35);
+  box-shadow: 0 10px 28px rgba(110, 132, 120, 0.35);
   transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
 }
 
 .pcf-btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 18px 42px rgba(255, 31, 31, 0.45);
+  box-shadow: 0 18px 42px rgba(110, 132, 120, 0.45);
 }
 
 .pcf-btn:disabled {
@@ -489,7 +491,7 @@ body {
 
 .pcf-upload-progress div {
   height: 100%;
-  background: linear-gradient(90deg, #ff1f1f, #ff7a3b);
+  background: linear-gradient(90deg, #6e8478, #EBD378);
   transition: width 0.2s;
 }
 
@@ -497,8 +499,8 @@ body {
 .pcf-err {
   color: #ff8585;
   font-size: 14px;
-  background: rgba(255, 59, 59, 0.08);
-  border: 1px solid rgba(255, 59, 59, 0.25);
+  background: rgba(248, 113, 113, 0.08);
+  border: 1px solid rgba(248, 113, 113, 0.25);
   border-radius: 12px;
   padding: 12px 16px;
   margin-top: 16px;
@@ -522,6 +524,7 @@ body {
 /* === TOP NAV (Clients / Leads / Dashboard / Settings) === */
 .pcf-topnav {
   display: flex;
+  align-items: center;
   gap: 6px;
   flex-wrap: wrap;
   background: var(--bg-2);
@@ -529,6 +532,13 @@ body {
   border-radius: 14px;
   padding: 6px;
   margin-bottom: 20px;
+}
+.pcf-topnav-logo {
+  display: flex;
+  align-items: center;
+  padding: 4px 12px 4px 6px;
+  margin-left: 6px;
+  border-left: 1px solid var(--line);
 }
 /* כפתור בתפריט (מחליף הערכה) — מאפס את ברירת המחדל של הדפדפן כדי שייראה כמו שאר הפריטים */
 button.pcf-topnav-item {
@@ -780,8 +790,8 @@ button.pcf-topnav-item {
 }
 
 .pcf-pill-status.danger {
-  background: rgba(255, 80, 80, 0.15);
-  color: #ff6b6b;
+  background: rgba(248, 113, 113, 0.15);
+  color: #f87171;
 }
 
 /* === CONTRACT EDITOR === */
@@ -847,7 +857,7 @@ button.pcf-topnav-item {
   display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 8px; cursor: pointer; font-size: 13px;
 }
 .pcf-field-row:hover { background: var(--hover); }
-.pcf-field-row.active { background: rgba(255, 59, 59, 0.12); }
+.pcf-field-row.active { background: rgba(110, 132, 120, 0.14); }
 
 .pcf-editor-canvas {
   display: flex; flex-direction: column; align-items: center; gap: 16px;

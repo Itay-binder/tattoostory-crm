@@ -4,23 +4,20 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { onAuthStateChanged, signInWithPopup, setPersistence, browserLocalPersistence, signOut, firebaseAuth, googleProvider, type User } from "@/lib/authClient";
 import AdminNav from "./AdminNav";
 
-const STATUS_LABELS: Record<string, string> = {
-  new: "חדש",
-  contacted: "נוצר קשר",
-  qualified: "מוכשר",
-  interested: "מעוניין",
-  follow_up: "מעקב",
-  enrolled: "נרשם",
-  closed_lost: "נסגר",
-};
-const STATUS_COLORS: Record<string, { color: string; bg: string }> = {
-  new: { color: "#c4a899", bg: "rgba(196,168,153,0.12)" },
-  contacted: { color: "#7db3ff", bg: "rgba(90,150,255,0.12)" },
-  qualified: { color: "#d4a853", bg: "rgba(212,168,83,0.12)" },
-  interested: { color: "#c8835a", bg: "rgba(200,131,90,0.14)" },
-  follow_up: { color: "#e5c67a", bg: "rgba(229,198,122,0.12)" },
-  enrolled: { color: "#34d399", bg: "rgba(52,211,153,0.12)" },
-  closed_lost: { color: "#f87171", bg: "rgba(248,113,113,0.1)" },
+const STATUS_LABELS: Record<string, { label: string; color: string; bg: string }> = {
+  "ליד חדש":          { label: "ליד חדש",          color: "#c4a899", bg: "rgba(196,168,153,0.12)" },
+  "שיחה 1 יצאה":      { label: "שיחה 1 יצאה",      color: "#7db3ff", bg: "rgba(90,150,255,0.12)"  },
+  "שתי שיחות יצאו":   { label: "שתי שיחות יצאו",   color: "#7db3ff", bg: "rgba(90,150,255,0.1)"   },
+  "שלוש שיחות יצאו":  { label: "שלוש שיחות יצאו",  color: "#7db3ff", bg: "rgba(90,150,255,0.08)"  },
+  "4 שיחות יצאו":     { label: "4 שיחות יצאו",     color: "#6e8478", bg: "rgba(110,132,120,0.12)" },
+  "אין מענה":          { label: "אין מענה",          color: "#9b9ba0", bg: "rgba(155,155,160,0.12)" },
+  "נשלחה הודעה":       { label: "נשלחה הודעה",       color: "#d4a853", bg: "rgba(212,168,83,0.12)"  },
+  "נקבעה שיחה":        { label: "נקבעה שיחה",        color: "#EBD378", bg: "rgba(235,211,120,0.14)" },
+  "בטיפול":            { label: "בטיפול",            color: "#8B4708", bg: "rgba(139,71,8,0.18)"    },
+  "מתעניינת":          { label: "מתעניינת",          color: "#c8835a", bg: "rgba(200,131,90,0.14)"  },
+  "פולואפ עתידי":      { label: "פולואפ עתידי",      color: "#e5c67a", bg: "rgba(229,198,122,0.12)" },
+  "נסגר":              { label: "נסגר",              color: "#34d399", bg: "rgba(52,211,153,0.12)"  },
+  "לא רלוונטי":        { label: "לא רלוונטי",        color: "#f87171", bg: "rgba(248,113,113,0.1)"  },
 };
 
 const STATUSES = Object.keys(STATUS_LABELS);
@@ -201,7 +198,7 @@ export default function AdminLeads() {
         <button className={`pcf-pill sm${statusTab === "all" ? " active" : ""}`} onClick={() => setStatusTab("all")}>הכל ({allCount})</button>
         {STATUSES.map((s) => (
           <button key={s} className={`pcf-pill sm${statusTab === s ? " active" : ""}`} onClick={() => setStatusTab(s)}>
-            {STATUS_LABELS[s]} ({statusCounts[s] || 0})
+            {STATUS_LABELS[s]?.label || s} ({statusCounts[s] || 0})
           </button>
         ))}
       </div>
@@ -250,12 +247,13 @@ export default function AdminLeads() {
                         onChange={(e) => changeStatus(l.id, e.target.value)}
                         style={{
                           padding: "4px 8px", borderRadius: 8, border: "1px solid var(--line)",
-                          background: STATUS_COLORS[l.status]?.bg || "var(--surface)",
-                          color: STATUS_COLORS[l.status]?.color || "var(--text)",
+                          background: STATUS_LABELS[l.status]?.bg || "var(--surface)",
+                          color: STATUS_LABELS[l.status]?.color || "var(--text)",
                           fontWeight: 600, fontSize: 13, cursor: "pointer", fontFamily: "inherit",
                         }}
                       >
-                        {STATUSES.map((s) => <option key={s} value={s}>{STATUS_LABELS[s]}</option>)}
+                        {STATUSES.map((s) => <option key={s} value={s}>{STATUS_LABELS[s]?.label || s}</option>)}
+                        {!STATUS_LABELS[l.status] && <option value={l.status}>{l.status}</option>}
                       </select>
                     </td>
                     <td style={{ fontSize: 13, color: "var(--muted)" }}>{l.source || "—"}</td>

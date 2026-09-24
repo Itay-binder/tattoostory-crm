@@ -2,39 +2,43 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { onAuthStateChanged, signInWithPopup, setPersistence, browserLocalPersistence, signOut, firebaseAuth, googleProvider, type User } from "@/lib/authClient";
-import { CLIENT_STAGES, CLIENT_STAGE_KIND, CLIENT_PACES, clientStageLabel } from "@/lib/clients";
-import { phoneCore } from "@/lib/reps";
 import AdminNav from "./AdminNav";
 
-const CONTRACT_STATUSES = ["טרם הופק הסכם", "הופק הסכם", "ממתין לחתימות", "נחתם"];
+const STATUS_LABELS: Record<string, string> = {
+  new: "חדש",
+  contacted: "נוצר קשר",
+  qualified: "מוכשר",
+  interested: "מעוניין",
+  follow_up: "מעקב",
+  enrolled: "נרשם",
+  closed_lost: "נסגר",
+};
+const STATUS_COLORS: Record<string, { color: string; bg: string }> = {
+  new: { color: "#c4a899", bg: "rgba(196,168,153,0.12)" },
+  contacted: { color: "#7db3ff", bg: "rgba(90,150,255,0.12)" },
+  qualified: { color: "#d4a853", bg: "rgba(212,168,83,0.12)" },
+  interested: { color: "#c8835a", bg: "rgba(200,131,90,0.14)" },
+  follow_up: { color: "#e5c67a", bg: "rgba(229,198,122,0.12)" },
+  enrolled: { color: "#34d399", bg: "rgba(52,211,153,0.12)" },
+  closed_lost: { color: "#f87171", bg: "rgba(248,113,113,0.1)" },
+};
 
-interface ClientRow {
-  uid: string;
-  fullName: string;
-  email: string;
-  phone: string;
+const STATUSES = Object.keys(STATUS_LABELS);
+
+interface Lead {
+  id: string;
   status: string;
-  stage: string;
-  contractStatus: string;
-  filesCount: number;
-  answeredCount: number;
-  totalFields: number;
-  updatedAt: string;
-  submittedAt: string;
-  clientSince: string;
-  pace: string;
-  paceUpdatedAt: string;
-  driveFolderLink: string;
+  contact_id: string;
+  first_name: string;
+  last_name: string;
+  full_name: string;
+  phone: string;
+  email: string;
+  source: string;
+  created_at: string;
+  updated_at: string;
+  last_activity_at: string;
 }
-
-// עיצוב תגית סטטוס ההסכם
-function contractPill(s: string): { color: string; bg: string } {
-  if (s === "נחתם") return { color: "#34d399", bg: "rgba(37,211,102,0.12)" };
-  if (s === "ממתין לחתימות") return { color: "var(--gold)", bg: "rgba(255,200,87,0.12)" };
-  if (s === "הופק הסכם") return { color: "#7db3ff", bg: "rgba(90,150,255,0.12)" };
-  return { color: "var(--muted)", bg: "rgba(255,255,255,0.05)" }; // טרם הופק
-}
-interface Stats { total: number; submitted: number; drafts: number; totalFiles: number; }
 
 function fmtDate(s: string): string {
   if (!s) return "—";
@@ -42,141 +46,84 @@ function fmtDate(s: string): string {
   catch { return s; }
 }
 
-export default function AdminDashboard() {
+export default function AdminLeads() {
   const [user, setUser] = useState<User | null>(null);
   const [authReady, setAuthReady] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [denied, setDenied] = useState(false);
-  const [stats, setStats] = useState<Stats | null>(null);
-  const [clients, setClients] = useState<ClientRow[]>([]);
   const [err, setErr] = useState<string | null>(null);
-  // סינון מהיר לפי שלב + חיפוש פר-עמודה
-  const [stageTab, setStageTab] = useState<string>("all");
-  const [filters, setFilters] = useState<Record<string, string>>({});
-  const [savingStage, setSavingStage] = useState<string | null>(null);
-  const [savingPace, setSavingPace] = useState<string | null>(null);
-  const [page, setPage] = useState(1);
-  const [sortKey, setSortKey] = useState<"clientSince" | "updatedAt">("clientSince");
-  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
-  const PAGE_SIZE = 50;
+  const [loading, setLoading] = useState(false);
 
-  const toggleSort = (k: "clientSince" | "updatedAt") => {
-    if (sortKey === k) setSortDir((d) => (d === "desc" ? "asc" : "desc"));
-    else { setSortKey(k); setSortDir("desc"); }
-  };
+  const [leads, setLeads] = useState<Lead[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [pageCount, setPageCount] = useState(1);
+  const [statusCounts, setStatusCounts] = useState<Record<string, number>>({});
+  const [statusTab, setStatusTab] = useState("all");
+  const [search, setSearch] = useState("");
+  const [savingId, setSavingId] = useState<string | null>(null);
+
+  const [showAdd, setShowAdd] = useState(false);
+  const [newLead, setNewLead] = useState({ first_name: "", last_name: "", phone: "", email: "", source: "" });
+  const [addBusy, setAddBusy] = useState(false);
 
   useEffect(() => onAuthStateChanged(firebaseAuth(), (u) => { setUser(u); setAuthReady(true); }), []);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (pg = page) => {
+    if (!user) return;
     setLoading(true); setErr(null); setDenied(false);
     try {
-      const t = await firebaseAuth().currentUser!.getIdToken();
-      const res = await fetch("/api/admin/clients", { headers: { Authorization: `Bearer ${t}` } });
+      const t = await user.getIdToken();
+      const params = new URLSearchParams({ page: String(pg) });
+      if (statusTab !== "all") params.set("status", statusTab);
+      if (search) params.set("q", search);
+      const res = await fetch(`/api/admin/leads?${params}`, { headers: { Authorization: `Bearer ${t}` } });
       if (res.status === 403) { setDenied(true); return; }
-      if (!res.ok) throw new Error("load failed");
-      const data = await res.json();
-      setStats(data.stats); setClients(data.clients);
-    } catch { setErr("שגיאה בטעינת הנתונים"); }
+      if (!res.ok) throw new Error("שגיאה בטעינה");
+      const d = await res.json();
+      setLeads(d.leads);
+      setTotal(d.total);
+      setPageCount(d.pageCount);
+      setStatusCounts(d.statusCounts || {});
+    } catch (e) { setErr((e as Error).message); }
     finally { setLoading(false); }
-  }, []);
+  }, [user, statusTab, search, page]);
 
-  useEffect(() => { if (user) load(); }, [user, load]);
+  useEffect(() => { if (user) { setPage(1); load(1); } }, [user, statusTab, search]);
 
-  const stageCounts = useMemo(() => {
-    const c: Record<string, number> = { all: clients.length };
-    for (const s of CLIENT_STAGES) c[s.key] = 0;
-    for (const cl of clients) c[cl.stage] = (c[cl.stage] || 0) + 1;
-    return c;
-  }, [clients]);
-
-  const setFilter = (k: string, v: string) => setFilters((p) => ({ ...p, [k]: v }));
-
-  const rows = useMemo(() => {
-    let out = clients;
-    if (stageTab !== "all") out = out.filter((c) => c.stage === stageTab);
-    const get: Record<string, (c: ClientRow) => string> = {
-      fullName: (c) => c.fullName,
-      phone: (c) => c.phone,
-      email: (c) => c.email,
-      stage: (c) => clientStageLabel(c.stage),
-      status: (c) => (c.status === "submitted" ? "נשלח" : c.status === "manual" ? "לקוח ידני" : "טיוטה"),
-      contractStatus: (c) => c.contractStatus,
-    };
-    for (const [k, v] of Object.entries(filters)) {
-      if (!v.trim()) continue;
-      const g = get[k]; if (!g) continue;
-      // טלפון — התאמה רחבה: 0526660006 / 972526660006 / +972-52-666-0006 מוצאים אותו דבר
-      if (k === "phone") {
-        const core = phoneCore(v);
-        if (!core) continue;
-        out = out.filter((c) => phoneCore(c.phone).includes(core));
-        continue;
-      }
-      const q = v.trim().toLowerCase();
-      out = out.filter((c) => (g(c) || "").toLowerCase().includes(q));
-    }
-    // מיון לפי העמודה הנבחרת (תאריך)
-    const dir = sortDir === "desc" ? -1 : 1;
-    out = [...out].sort((a, b) => String(a[sortKey] || "").localeCompare(String(b[sortKey] || "")) * dir);
-    return out;
-  }, [clients, stageTab, filters, sortKey, sortDir]);
-
-  // עימוד — 50 בעמוד. חזרה לעמוד 1 בכל שינוי סינון/מיון.
-  useEffect(() => { setPage(1); }, [stageTab, filters, sortKey, sortDir]);
-  const pageCount = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
-  const pagedRows = useMemo(() => rows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE), [rows, page]);
-
-  /** עדכון שלב ישירות מהטבלה — בלי להיכנס לכרטיס. עדכון אופטימי + החזרה במקרה כשל. */
-  const changeStage = async (uid: string, stage: string) => {
-    const prev = clients.find((c) => c.uid === uid)?.stage;
-    setClients((p) => p.map((c) => (c.uid === uid ? { ...c, stage } : c)));
-    setSavingStage(uid); setErr(null);
+  const changeStatus = async (id: string, status: string) => {
+    const prev = leads.find((l) => l.id === id)?.status;
+    setLeads((ls) => ls.map((l) => l.id === id ? { ...l, status } : l));
+    setSavingId(id);
     try {
-      const t = await firebaseAuth().currentUser!.getIdToken();
-      const res = await fetch(`/api/admin/client/${uid}`, {
-        method: "POST",
+      const t = await user!.getIdToken();
+      const res = await fetch(`/api/admin/leads/${id}`, {
+        method: "PATCH",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${t}` },
-        body: JSON.stringify({ action: "set-stage", stage }),
+        body: JSON.stringify({ status }),
       });
       if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || "שגיאה");
     } catch (e) {
-      setClients((p) => p.map((c) => (c.uid === uid ? { ...c, stage: prev || "new" } : c)));
-      setErr(`עדכון השלב נכשל — ${(e as Error).message}`);
-    } finally { setSavingStage(null); }
+      setLeads((ls) => ls.map((l) => l.id === id ? { ...l, status: prev || "new" } : l));
+      setErr(`עדכון סטטוס נכשל — ${(e as Error).message}`);
+    } finally { setSavingId(null); }
   };
 
-  /** עדכון קצב הלקוח מהטבלה — עם תאריך עדכון אוטומטי. */
-  const changePace = async (uid: string, pace: string) => {
-    const prev = clients.find((c) => c.uid === uid);
-    const now = new Date().toISOString();
-    setClients((p) => p.map((c) => (c.uid === uid ? { ...c, pace, paceUpdatedAt: pace ? now : "" } : c)));
-    setSavingPace(uid); setErr(null);
+  const addLead = async () => {
+    if (!newLead.phone && !newLead.email) { setErr("צריך טלפון או מייל"); return; }
+    setAddBusy(true); setErr(null);
     try {
-      const t = await firebaseAuth().currentUser!.getIdToken();
-      const res = await fetch(`/api/admin/client/${uid}`, {
-        method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${t}` },
-        body: JSON.stringify({ action: "set-pace", pace }),
-      });
-      if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || "שגיאה");
-    } catch (e) {
-      setClients((p) => p.map((c) => (c.uid === uid ? { ...c, pace: prev?.pace || "", paceUpdatedAt: prev?.paceUpdatedAt || "" } : c)));
-      setErr(`עדכון הקצב נכשל — ${(e as Error).message}`);
-    } finally { setSavingPace(null); }
-  };
-
-  const deleteClient = async (uid: string, name: string) => {
-    const confirm = window.prompt(`מחיקת "${name || "הלקוח"}" היא לצמיתות. הקלד DELETE לאישור:`);
-    if (confirm !== "DELETE") return;
-    try {
-      const t = await firebaseAuth().currentUser!.getIdToken();
-      const res = await fetch(`/api/admin/client/${uid}`, {
+      const t = await user!.getIdToken();
+      const res = await fetch("/api/admin/leads", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${t}` },
-        body: JSON.stringify({ action: "delete-client", confirm }),
+        body: JSON.stringify(newLead),
       });
       if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || "שגיאה");
-      load();
-    } catch (e) { setErr(`מחיקה נכשלה — ${(e as Error).message}`); }
+      setShowAdd(false);
+      setNewLead({ first_name: "", last_name: "", phone: "", email: "", source: "" });
+      load(1);
+    } catch (e) { setErr((e as Error).message); }
+    finally { setAddBusy(false); }
   };
 
   const login = async () => {
@@ -185,156 +132,169 @@ export default function AdminDashboard() {
       await signInWithPopup(firebaseAuth(), googleProvider);
     } catch (e: unknown) {
       const code = (e as { code?: string }).code || "";
-      if (!code.includes("popup-closed") && !code.includes("cancelled")) setErr(`התחברות נכשלה — ${code}`);
+      if (!code.includes("popup-closed") && !code.includes("cancelled")) setErr(`שגיאת כניסה — ${code}`);
     }
   };
 
-  if (!authReady) return <main className="pcf-wrap pcf-wide"><div className="pcf-spin" style={{ margin: "60px auto" }} /></main>;
+  const allCount = useMemo(() => Object.values(statusCounts).reduce((a, b) => a + b, 0), [statusCounts]);
 
-  if (!user) {
-    return (
-      <main className="pcf-wrap pcf-wide">
-        <header className="pcf-hero"><span className="pcf-badge">ניהול • פאוור קאפל</span><h1>כניסת מנהלים</h1></header>
-        <div className="pcf-card pcf-login">
-          <p className="lead" style={{ textAlign: "center" }}>התחברו עם חשבון מנהל מורשה.</p>
-          <button className="pcf-btn white" onClick={login}>התחברות עם Google</button>
-          {err && <div className="pcf-err">{err}</div>}
-        </div>
-      </main>
-    );
-  }
+  if (!authReady) return (
+    <main style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh" }}>
+      <div className="pcf-spin" />
+    </main>
+  );
 
-  if (denied) {
-    return (
-      <main className="pcf-wrap pcf-wide">
-        <header className="pcf-hero"><span className="pcf-badge">ניהול • פאוור קאפל</span><h1>אין הרשאת גישה</h1></header>
-        <div className="pcf-card" style={{ textAlign: "center" }}>
-          <p style={{ color: "var(--muted)" }}>החשבון <b>{user.email}</b> אינו מורשה לממשק הניהול.</p>
-          <button className="pcf-btn ghost" style={{ marginTop: 16 }} onClick={() => signOut(firebaseAuth())}>התנתקות</button>
-        </div>
-      </main>
-    );
-  }
+  if (!user) return (
+    <main className="pcf-wrap pcf-wide">
+      <div className="pcf-card pcf-login" style={{ maxWidth: 400, margin: "80px auto", textAlign: "center" }}>
+        <span className="pcf-badge" style={{ marginBottom: 16, display: "inline-block" }}>Tattoo Story Academy</span>
+        <h1 style={{ fontSize: 24, marginBottom: 8, fontWeight: 800 }}>כניסת מנהלים</h1>
+        <p style={{ color: "var(--muted)", marginBottom: 24 }}>התחברו עם חשבון מנהל מורשה.</p>
+        <button className="pcf-btn" onClick={login}>התחברות עם Google</button>
+        {err && <div className="pcf-err" style={{ marginTop: 12 }}>{err}</div>}
+      </div>
+    </main>
+  );
+
+  if (denied) return (
+    <main className="pcf-wrap pcf-wide">
+      <div className="pcf-card" style={{ maxWidth: 400, margin: "80px auto", textAlign: "center" }}>
+        <h1 style={{ fontSize: 22 }}>אין גישה</h1>
+        <p style={{ color: "var(--muted)" }}>החשבון <b>{user.email}</b> אינו מורשה.</p>
+        <button className="pcf-btn ghost" style={{ marginTop: 16 }} onClick={() => signOut(firebaseAuth())}>התנתקות</button>
+      </div>
+    </main>
+  );
 
   return (
     <main className="pcf-wrap pcf-wide">
       <AdminNav />
+
       <div className="pcf-admin-top">
         <div>
-          <span className="pcf-badge">ניהול • פאוור קאפל</span>
-          <h1 style={{ fontSize: 28, margin: "12px 0 0" }}>לקוחות</h1>
+          <span className="pcf-badge">Tattoo Story Academy</span>
+          <h1 style={{ fontSize: 26, margin: "10px 0 0", fontWeight: 800 }}>לידים</h1>
         </div>
-        <div className="pcf-user">
-          <a className="pcf-btn ghost" href="/admin/templates" style={{ padding: "8px 16px", fontSize: 14 }}>📄 תבניות הסכם</a>
-          <span>{user.email}</span>
-          <button className="pcf-link-btn" onClick={() => signOut(firebaseAuth())}>התנתקות</button>
+        <div className="pcf-user" style={{ display: "flex", gap: 12, alignItems: "center" }}>
+          <button className="pcf-btn" style={{ padding: "8px 16px", fontSize: 14 }} onClick={() => setShowAdd(true)}>+ ליד חדש</button>
+          <span style={{ color: "var(--muted)", fontSize: 14 }}>{user.email}</span>
+          <button className="pcf-link-btn" onClick={() => signOut(firebaseAuth())}>יציאה</button>
         </div>
       </div>
 
-      {loading && <div className="pcf-spin" style={{ margin: "40px auto" }} />}
-      {err && <div className="pcf-err">{err}</div>}
+      {err && <div className="pcf-err" style={{ margin: "12px 0" }}>{err}</div>}
 
-      {stats && (
-        <div className="pcf-stats">
-          <div className="pcf-stat"><div className="num">{stats.total}</div><div className="lbl">סה"כ לקוחות</div></div>
-          <div className="pcf-stat"><div className="num" style={{ color: "var(--green)" }}>{stats.submitted}</div><div className="lbl">הגישו שאלון</div></div>
-          <div className="pcf-stat"><div className="num" style={{ color: "var(--gold)" }}>{stats.drafts}</div><div className="lbl">טיוטות (לא הוגש)</div></div>
-          <div className="pcf-stat"><div className="num">{stats.totalFiles}</div><div className="lbl">קבצים שהועלו</div></div>
+      {/* טאבי סטטוס */}
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", margin: "18px 0 14px", padding: "12px 14px", background: "var(--surface-2)", border: "1px solid var(--line)", borderRadius: 14 }}>
+        <button className={`pcf-pill sm${statusTab === "all" ? " active" : ""}`} onClick={() => setStatusTab("all")}>הכל ({allCount})</button>
+        {STATUSES.map((s) => (
+          <button key={s} className={`pcf-pill sm${statusTab === s ? " active" : ""}`} onClick={() => setStatusTab(s)}>
+            {STATUS_LABELS[s]} ({statusCounts[s] || 0})
+          </button>
+        ))}
+      </div>
+
+      {/* חיפוש */}
+      <div style={{ marginBottom: 14 }}>
+        <input
+          className="pcf-search"
+          placeholder="חיפוש לפי שם, טלפון או מייל..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          style={{ width: "100%", padding: "10px 14px", borderRadius: 10, border: "1px solid var(--line)", background: "var(--surface)", color: "var(--text)", fontSize: 15, fontFamily: "inherit", outline: "none" }}
+        />
+      </div>
+
+      {loading && <div className="pcf-spin" style={{ margin: "40px auto" }} />}
+
+      {!loading && (
+        <div className="pcf-card" style={{ padding: 0, overflow: "hidden" }}>
+          <div className="pcf-admin-tabhead">
+            {total} לידים{leads.length !== total ? ` (מציג ${leads.length})` : ""}
+          </div>
+          <div style={{ overflowX: "auto" }}>
+            <table className="pcf-table pcf-leads-table">
+              <thead>
+                <tr>
+                  <th>שם</th>
+                  <th>טלפון</th>
+                  <th>מייל</th>
+                  <th>סטטוס</th>
+                  <th>מקור</th>
+                  <th>נוצר</th>
+                  <th>עדכון</th>
+                </tr>
+              </thead>
+              <tbody>
+                {leads.map((l) => (
+                  <tr key={l.id} style={{ cursor: "pointer" }} onClick={() => (window.location.href = `/admin/leads/${l.id}`)}>
+                    <td><b>{l.full_name || "(ללא שם)"}</b></td>
+                    <td dir="ltr" style={{ textAlign: "right" }}>{l.phone || "—"}</td>
+                    <td dir="ltr" style={{ textAlign: "right", fontSize: 13 }}>{l.email || "—"}</td>
+                    <td onClick={(e) => e.stopPropagation()}>
+                      <select
+                        value={l.status}
+                        disabled={savingId === l.id}
+                        onChange={(e) => changeStatus(l.id, e.target.value)}
+                        style={{
+                          padding: "4px 8px", borderRadius: 8, border: "1px solid var(--line)",
+                          background: STATUS_COLORS[l.status]?.bg || "var(--surface)",
+                          color: STATUS_COLORS[l.status]?.color || "var(--text)",
+                          fontWeight: 600, fontSize: 13, cursor: "pointer", fontFamily: "inherit",
+                        }}
+                      >
+                        {STATUSES.map((s) => <option key={s} value={s}>{STATUS_LABELS[s]}</option>)}
+                      </select>
+                    </td>
+                    <td style={{ fontSize: 13, color: "var(--muted)" }}>{l.source || "—"}</td>
+                    <td style={{ fontSize: 13, color: "var(--muted)", whiteSpace: "nowrap" }}>{fmtDate(l.created_at)}</td>
+                    <td style={{ fontSize: 13, color: "var(--muted)", whiteSpace: "nowrap" }}>{fmtDate(l.updated_at)}</td>
+                  </tr>
+                ))}
+                {leads.length === 0 && (
+                  <tr><td colSpan={7} style={{ textAlign: "center", padding: 40, color: "var(--muted)" }}>אין לידים תואמים</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+          {pageCount > 1 && (
+            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 12, padding: "12px 0" }}>
+              <button className="pcf-btn ghost" style={{ padding: "6px 14px", fontSize: 13 }} disabled={page <= 1} onClick={() => { setPage((p) => p - 1); load(page - 1); }}>← הקודם</button>
+              <span style={{ fontSize: 13, color: "var(--muted)" }}>עמוד {page} מתוך {pageCount}</span>
+              <button className="pcf-btn ghost" style={{ padding: "6px 14px", fontSize: 13 }} disabled={page >= pageCount} onClick={() => { setPage((p) => p + 1); load(page + 1); }}>הבא →</button>
+            </div>
+          )}
         </div>
       )}
 
-      {stats && (
-        <>
-          {/* טאבים לסינון מהיר לפי שלב */}
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 18, padding: "12px 14px", background: "var(--surface-2,rgba(255,255,255,.03))", border: "1px solid var(--line)", borderRadius: 14, alignItems: "center" }}>
-            <button className={`pcf-pill sm${stageTab === "all" ? " active" : ""}`} onClick={() => setStageTab("all")}>הכל ({stageCounts.all})</button>
-            {CLIENT_STAGES.map((s) => (
-              <button key={s.key} className={`pcf-pill sm${stageTab === s.key ? " active" : ""}`} onClick={() => setStageTab(s.key)}>{s.label} ({stageCounts[s.key] || 0})</button>
-            ))}
-          </div>
-
-          <div className="pcf-card" style={{ marginTop: 14, padding: 0, overflow: "hidden" }}>
-            <div className="pcf-admin-tabhead">ניהול לקוחות ({rows.length}{rows.length !== clients.length ? ` מתוך ${clients.length}` : ""})</div>
-            <div style={{ overflowX: "auto" }}>
-              <table className="pcf-table pcf-leads-table">
-                <thead>
-                  <tr><th>שם</th><th>טלפון</th><th>אימייל</th><th>שלב</th><th>סטטוס</th><th>הסכם</th><th>התקדמות</th><th>קבצים</th><th>⚡ קצב</th><th>עדכון קצב</th>
-                    <th style={{ cursor: "pointer", whiteSpace: "nowrap" }} onClick={() => toggleSort("clientSince")}>קליטה כלקוח {sortKey === "clientSince" ? (sortDir === "desc" ? "▼" : "▲") : ""}</th>
-                    <th style={{ cursor: "pointer", whiteSpace: "nowrap" }} onClick={() => toggleSort("updatedAt")}>עודכן {sortKey === "updatedAt" ? (sortDir === "desc" ? "▼" : "▲") : ""}</th>
-                    <th></th></tr>
-                  <tr className="pcf-filter-row">
-                    <th><input value={filters.fullName || ""} onChange={(e) => setFilter("fullName", e.target.value)} placeholder="סינון…" /></th>
-                    <th><input value={filters.phone || ""} onChange={(e) => setFilter("phone", e.target.value)} placeholder="סינון…" /></th>
-                    <th><input value={filters.email || ""} onChange={(e) => setFilter("email", e.target.value)} placeholder="סינון…" /></th>
-                    <th>
-                      <select value={filters.stage || ""} onChange={(e) => setFilter("stage", e.target.value)}>
-                        <option value="">הכל</option>
-                        {CLIENT_STAGES.map((s) => <option key={s.key} value={s.label}>{s.label}</option>)}
-                      </select>
-                    </th>
-                    <th>
-                      <select value={filters.status || ""} onChange={(e) => setFilter("status", e.target.value)}>
-                        <option value="">הכל</option>
-                        {["נשלח", "טיוטה", "לקוח ידני"].map((s) => <option key={s} value={s}>{s}</option>)}
-                      </select>
-                    </th>
-                    <th>
-                      <select value={filters.contractStatus || ""} onChange={(e) => setFilter("contractStatus", e.target.value)}>
-                        <option value="">הכל</option>
-                        {CONTRACT_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
-                      </select>
-                    </th>
-                    <th /><th /><th /><th /><th /><th />
-                  </tr>
-                </thead>
-                <tbody>
-                  {pagedRows.map((c) => (
-                    <tr key={c.uid} onClick={() => (window.location.href = `/admin/${c.uid}`)}>
-                      <td><b>{c.fullName || "(ללא שם)"}</b></td>
-                      <td dir="ltr" style={{ textAlign: "right" }}>{c.phone || "—"}</td>
-                      <td dir="ltr" style={{ textAlign: "right" }}>{c.email}</td>
-                      <td onClick={(e) => e.stopPropagation()}>
-                        <select
-                          className={`pcf-stage-sel ${CLIENT_STAGE_KIND[c.stage] || "draft"}`}
-                          value={c.stage}
-                          disabled={savingStage === c.uid}
-                          onChange={(e) => changeStage(c.uid, e.target.value)}
-                          title="שינוי שלב"
-                        >
-                          {CLIENT_STAGES.map((s) => <option key={s.key} value={s.key}>{s.label}</option>)}
-                        </select>
-                      </td>
-                      <td>{c.status === "submitted" ? <span className="pcf-pill-status done">נשלח ✓</span> : c.status === "manual" ? <span className="pcf-pill-status draft">לקוח ידני</span> : <span className="pcf-pill-status draft">טיוטה</span>}</td>
-                      <td><span className="pcf-pill-status" style={{ color: contractPill(c.contractStatus).color, background: contractPill(c.contractStatus).bg, whiteSpace: "nowrap" }}>{c.contractStatus}</span></td>
-                      <td>{c.answeredCount}/{c.totalFields}</td>
-                      <td>{c.filesCount}</td>
-                      <td onClick={(e) => e.stopPropagation()}>
-                        <select className="pcf-stage-sel" value={c.pace || ""} disabled={savingPace === c.uid} onChange={(e) => changePace(c.uid, e.target.value)} title="קצב הלקוח">
-                          <option value="">—</option>
-                          {CLIENT_PACES.map((p) => <option key={p} value={p}>{p}</option>)}
-                        </select>
-                      </td>
-                      <td style={{ fontSize: 13, color: "var(--muted)", whiteSpace: "nowrap" }}>{c.paceUpdatedAt ? fmtDate(c.paceUpdatedAt) : "—"}</td>
-                      <td style={{ fontSize: 13, color: "var(--muted)" }}>{fmtDate(c.clientSince)}</td>
-                      <td style={{ fontSize: 13, color: "var(--muted)" }}>{fmtDate(c.updatedAt)}</td>
-                      <td onClick={(e) => e.stopPropagation()}>
-                        <button className="pcf-link-btn" style={{ fontSize: 12, color: "var(--accent)" }} onClick={() => deleteClient(c.uid, c.fullName)}>מחק</button>
-                      </td>
-                    </tr>
-                  ))}
-                  {rows.length === 0 && <tr><td colSpan={13} style={{ textAlign: "center", padding: 30, color: "var(--muted)" }}>אין לקוחות תואמים</td></tr>}
-                </tbody>
-              </table>
-            </div>
-            {pageCount > 1 && (
-              <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 12, padding: "12px 0" }}>
-                <button className="pcf-btn ghost" style={{ padding: "6px 14px", fontSize: 13 }} disabled={page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>← הקודם</button>
-                <span style={{ fontSize: 13, color: "var(--muted)" }}>עמוד {page} מתוך {pageCount}</span>
-                <button className="pcf-btn ghost" style={{ padding: "6px 14px", fontSize: 13 }} disabled={page >= pageCount} onClick={() => setPage((p) => Math.min(pageCount, p + 1))}>הבא →</button>
+      {/* מודל הוספת ליד */}
+      {showAdd && (
+        <div className="pcf-modal-overlay" onClick={() => setShowAdd(false)}>
+          <div className="pcf-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 440 }}>
+            <h3 style={{ margin: "0 0 16px", fontSize: 20 }}>ליד חדש</h3>
+            {[
+              { key: "first_name", label: "שם פרטי" },
+              { key: "last_name", label: "שם משפחה" },
+              { key: "phone", label: "טלפון" },
+              { key: "email", label: "מייל" },
+              { key: "source", label: "מקור" },
+            ].map(({ key, label }) => (
+              <div key={key} style={{ marginBottom: 12 }}>
+                <label style={{ fontSize: 13, color: "var(--muted)", display: "block", marginBottom: 4 }}>{label}</label>
+                <input
+                  value={(newLead as Record<string, string>)[key]}
+                  onChange={(e) => setNewLead((n) => ({ ...n, [key]: e.target.value }))}
+                  style={{ width: "100%", padding: "10px 12px", borderRadius: 10, border: "1px solid var(--line)", background: "var(--surface)", color: "var(--text)", fontSize: 15, fontFamily: "inherit", outline: "none" }}
+                />
               </div>
-            )}
+            ))}
+            {err && <div className="pcf-err" style={{ marginBottom: 12 }}>{err}</div>}
+            <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
+              <button className="pcf-btn ghost" style={{ flex: 1 }} onClick={() => setShowAdd(false)}>ביטול</button>
+              <button className="pcf-btn" style={{ flex: 1 }} disabled={addBusy} onClick={addLead}>{addBusy ? <span className="pcf-spin" /> : "הוספה"}</button>
+            </div>
           </div>
-        </>
+        </div>
       )}
     </main>
   );

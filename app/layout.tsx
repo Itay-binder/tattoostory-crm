@@ -1,29 +1,25 @@
 import type { Metadata, Viewport } from "next";
-import { Heebo } from "next/font/google";
+import { Rubik } from "next/font/google";
 import "./globals.css";
 
-const heebo = Heebo({ subsets: ["hebrew", "latin"], weight: ["400", "600", "700", "800", "900"] });
+const rubik = Rubik({ subsets: ["hebrew", "latin"], weight: ["400", "500", "600", "700", "800"] });
 
 export const metadata: Metadata = {
-  title: "שאלון פיננסי — פאוור קאפל",
-  description: "שאלון היכרות פיננסי ללקוחות דין ומיק — פאוור קאפל",
+  title: "Tattoo Story Academy — CRM",
+  description: "מערכת ניהול לקוחות — Tattoo Story Academy",
   robots: { index: false, follow: false },
 };
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#0b0d12",
+  themeColor: "#4f342a",
 };
-
-// מחיל את הערכה לפני הציור הראשון — בלי הבהוב של רקע כהה
-const NO_FLASH = `try{var t=localStorage.getItem('pcfTheme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="he" dir="rtl">
-      <head><script dangerouslySetInnerHTML={{ __html: NO_FLASH }} /></head>
-      <body className={heebo.className}>{children}</body>
+      <body className={rubik.className}>{children}</body>
     </html>
   );
 }

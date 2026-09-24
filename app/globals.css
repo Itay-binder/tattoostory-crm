@@ -1,4 +1,4 @@
-/* === שפת העיצוב של דפי פאוור קאפל (warmup) === */
+/* === שפת העיצוב של Tattoo Story Academy CRM === */
 *,
 *::before,
 *::after {
@@ -7,59 +7,58 @@
 
 /* === ערכת כהה (ברירת מחדל) === */
 :root {
-  --bg: #0b0d12;
-  --bg-2: #11141b;
-  --card: #161a23;
-  --line: rgba(255, 255, 255, 0.08);
-  --text: #f3f4f7;
-  --muted: #a7adba;
-  --accent: #ff3b3b;
-  --accent-2: #ff7a3b;
-  --gold: #ffc857;
+  --bg: #1e1210;
+  --bg-2: #271614;
+  --card: #321c18;
+  --line: rgba(255, 220, 190, 0.1);
+  --text: #f5ede8;
+  --muted: #c4a899;
+  --accent: #b0541e;
+  --accent-2: #c8835a;
+  --gold: #d4a853;
   --green: #25d366;
 
-  /* משטחים ומצבים — מוגדרים כמשתנים כדי שהערכה הבהירה תחליף אותם */
-  --surface: #0d1018;          /* שדות קלט, פאנלים פנימיים */
-  --surface-2: #1d2330;        /* צ'יפים, כפתורי אייקון */
-  --card-a: #171b25;           /* גרדיאנט הכרטיס — עליון */
-  --card-b: #0f1219;           /* גרדיאנט הכרטיס — תחתון */
-  --line-soft: rgba(255, 255, 255, 0.04);
-  --line-strong: rgba(255, 255, 255, 0.22);
-  --hover: rgba(255, 255, 255, 0.04);
-  --hover-2: rgba(255, 255, 255, 0.06);
-  --hover-soft: rgba(255, 255, 255, 0.03);
-  --spin-track: rgba(255, 255, 255, 0.3);
-  --spin-head: #fff;
-  --shadow: rgba(0, 0, 0, 0.4);
-  --glow: rgba(255, 59, 59, 0.18); /* זוהר עדין ברקע הדף */
+  --surface: #2a1612;
+  --surface-2: #3e2218;
+  --card-a: #351e18;
+  --card-b: #281410;
+  --line-soft: rgba(255, 220, 190, 0.05);
+  --line-strong: rgba(255, 220, 190, 0.25);
+  --hover: rgba(255, 220, 190, 0.05);
+  --hover-2: rgba(255, 220, 190, 0.08);
+  --hover-soft: rgba(255, 220, 190, 0.03);
+  --spin-track: rgba(255, 220, 190, 0.3);
+  --spin-head: #f5ede8;
+  --shadow: rgba(0, 0, 0, 0.5);
+  --glow: rgba(176, 84, 30, 0.2);
 }
 
-/* === ערכה בהירה (אפור/חום בהיר ועדין) === */
+/* === ערכה בהירה (ארצי-חום בהיר) === */
 :root[data-theme="light"] {
-  --bg: #f5f3f0;
-  --bg-2: #ebe8e3;
-  --card: #ffffff;
-  --line: rgba(60, 50, 40, 0.14);
-  --text: #23262c;
-  --muted: #6f7480;
-  --accent: #e02b2b;
-  --accent-2: #e86a2a;
+  --bg: #f2e8de;
+  --bg-2: #e9dcd1;
+  --card: #fff9f5;
+  --line: rgba(79, 52, 42, 0.14);
+  --text: #3b2a22;
+  --muted: #7a5c50;
+  --accent: #b0541e;
+  --accent-2: #c8835a;
   --gold: #b8860b;
   --green: #1aa34a;
 
-  --surface: #ffffff;
-  --surface-2: #e7e3dd;
+  --surface: #fff9f5;
+  --surface-2: #edddd3;
   --card-a: #ffffff;
-  --card-b: #faf8f5;
-  --line-soft: rgba(60, 50, 40, 0.08);
-  --line-strong: rgba(60, 50, 40, 0.3);
-  --hover: rgba(60, 50, 40, 0.05);
-  --hover-2: rgba(60, 50, 40, 0.08);
-  --hover-soft: rgba(60, 50, 40, 0.035);
-  --spin-track: rgba(60, 50, 40, 0.18);
+  --card-b: #fdf5ef;
+  --line-soft: rgba(79, 52, 42, 0.07);
+  --line-strong: rgba(79, 52, 42, 0.3);
+  --hover: rgba(79, 52, 42, 0.05);
+  --hover-2: rgba(79, 52, 42, 0.08);
+  --hover-soft: rgba(79, 52, 42, 0.03);
+  --spin-track: rgba(79, 52, 42, 0.18);
   --spin-head: var(--accent);
-  --shadow: rgba(60, 50, 40, 0.16);
-  --glow: rgba(224, 43, 43, 0.07);
+  --shadow: rgba(79, 52, 42, 0.15);
+  --glow: rgba(176, 84, 30, 0.08);
 }
 
 html,
@@ -97,14 +96,14 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: linear-gradient(90deg, #ff1f1f, #ff5a1f);
-  color: #fff;
+  background: linear-gradient(90deg, #4f342a, #b0541e);
+  color: #f5ede8;
   font-weight: 800;
   font-size: 14px;
   letter-spacing: 0.5px;
   padding: 6px 14px;
   border-radius: 999px;
-  box-shadow: 0 8px 24px rgba(255, 31, 31, 0.35);
+  box-shadow: 0 8px 24px rgba(176, 84, 30, 0.35);
 }
 
 .pcf-hero h1 {
@@ -169,7 +168,7 @@ body {
 }
 
 .pcf-progress span.done {
-  background: linear-gradient(90deg, #ff1f1f, #ff7a3b);
+  background: linear-gradient(90deg, #b0541e, #c8835a);
   border-color: transparent;
 }
 
@@ -258,11 +257,11 @@ body {
 }
 
 .pcf-pill:hover {
-  border-color: rgba(255, 59, 59, 0.4);
+  border-color: rgba(176, 84, 30, 0.4);
 }
 
 .pcf-pill.active {
-  background: linear-gradient(90deg, rgba(255, 31, 31, 0.18), rgba(255, 122, 59, 0.18));
+  background: linear-gradient(90deg, rgba(176, 84, 30, 0.18), rgba(200, 131, 90, 0.18));
   border-color: var(--accent);
   color: var(--text);
 }

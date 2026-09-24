@@ -1,47 +1,104 @@
 import { NextResponse } from "next/server";
+import { supa } from "@/lib/supabaseAdmin";
 import { verifyAdmin } from "@/lib/admin";
-import { listLeadsPage, upsertLead } from "@/lib/leadsRepo";
 
 export const runtime = "nodejs";
 
-// GET — עמוד לידים (50 בעמוד), מסונן וממוין בצד השרת.
-// פרמטרים: page, stage, sortKey, sortDir + f_<מפתח עמודה>=טקסט לפילטרי עמודות.
-// מחזיר גם total ו-stageCounts, כדי שהמסך לא יצטרך את כל הרשומות כדי לספור.
+const PAGE_SIZE = 50;
+
+const STATUSES = ["new", "contacted", "qualified", "interested", "follow_up", "enrolled", "closed_lost"] as const;
+
 export async function GET(req: Request) {
   const admin = await verifyAdmin(req);
   if (!admin) return NextResponse.json({ error: "unauthorized" }, { status: 403 });
 
   const sp = new URL(req.url).searchParams;
-  const filters: Record<string, string> = {};
-  for (const [k, v] of sp.entries()) if (k.startsWith("f_") && v.trim()) filters[k.slice(2)] = v;
+  const page = Math.max(1, Number(sp.get("page")) || 1);
+  const statusFilter = sp.get("status") || "all";
+  const search = (sp.get("q") || "").trim().toLowerCase();
 
-  const result = await listLeadsPage({
-    page: Number(sp.get("page")) || 1,
-    stage: sp.get("stage") || "all",
-    sortKey: sp.get("sortKey") || "updatedAt",
-    sortDir: sp.get("sortDir") === "asc" ? "asc" : "desc",
-    category: sp.get("category") === "distribution" ? "distribution" : "sales",
-    filters,
+  let query = supa()
+    .from("leads")
+    .select(`
+      id, status, stage, created_at, updated_at, last_activity_at,
+      contacts ( id, first_name, last_name, phone, email, source, created_at )
+    `, { count: "exact" });
+
+  if (statusFilter !== "all") query = query.eq("status", statusFilter);
+
+  const { data: rows, count, error } = await query
+    .order("created_at", { ascending: false })
+    .range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  let leads = (rows || []).map((r: Record<string, unknown>) => {
+    const c = r.contacts as Record<string, string> | null;
+    return {
+      id: r.id,
+      status: r.status,
+      stage: r.stage,
+      created_at: r.created_at,
+      updated_at: r.updated_at,
+      last_activity_at: r.last_activity_at,
+      contact_id: c?.id || "",
+      first_name: c?.first_name || "",
+      last_name: c?.last_name || "",
+      full_name: `${c?.first_name || ""} ${c?.last_name || ""}`.trim(),
+      phone: c?.phone || "",
+      email: c?.email || "",
+      source: c?.source || "",
+    };
   });
-  return NextResponse.json(result);
+
+  if (search) {
+    leads = leads.filter((l) =>
+      l.full_name.toLowerCase().includes(search) ||
+      l.phone.includes(search) ||
+      l.email.toLowerCase().includes(search)
+    );
+  }
+
+  const statusCounts = await Promise.all(
+    STATUSES.map(async (s) => {
+      const { count: c } = await supa().from("leads").select("id", { count: "exact", head: true }).eq("status", s);
+      return [s, c || 0] as [string, number];
+    })
+  );
+
+  return NextResponse.json({
+    leads,
+    total: count || 0,
+    page,
+    pageCount: Math.ceil((count || 0) / PAGE_SIZE),
+    statusCounts: Object.fromEntries(statusCounts),
+  });
 }
 
-// POST — הוספת ליד ידנית (עם זיהוי כפילות ואיחוד)
 export async function POST(req: Request) {
   const admin = await verifyAdmin(req);
   if (!admin) return NextResponse.json({ error: "unauthorized" }, { status: 403 });
+
   const body = await req.json().catch(() => ({}));
+  const { first_name, last_name, phone, email, source } = body;
 
-  const hasContact = (body.email && String(body.email).trim()) || (body.phone && String(body.phone).trim());
-  if (!hasContact) return NextResponse.json({ error: "צריך לפחות מייל או טלפון" }, { status: 400 });
+  if (!phone && !email) return NextResponse.json({ error: "צריך לפחות טלפון או מייל" }, { status: 400 });
 
-  const { lead, merged } = await upsertLead(
-    {
-      firstName: body.firstName, lastName: body.lastName, fullName: body.fullName,
-      email: body.email, phone: body.phone, idNumber: body.idNumber,
-      answers: body.answers, quali: body.quali, custom: body.custom,
-    },
-    { source: "manual", by: admin.email }
-  );
-  return NextResponse.json({ ok: true, lead, merged });
+  const { data: contact, error: cErr } = await supa()
+    .from("contacts")
+    .upsert({ first_name: first_name || "", last_name: last_name || "", phone: phone || null, email: email || null, source: source || "manual" }, { onConflict: "phone" })
+    .select()
+    .single();
+
+  if (cErr) return NextResponse.json({ error: cErr.message }, { status: 500 });
+
+  const { data: lead, error: lErr } = await supa()
+    .from("leads")
+    .insert({ contact_id: contact.id, status: "new" })
+    .select()
+    .single();
+
+  if (lErr) return NextResponse.json({ error: lErr.message }, { status: 500 });
+
+  return NextResponse.json({ ok: true, lead, contact });
 }

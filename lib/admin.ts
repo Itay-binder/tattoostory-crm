@@ -1,7 +1,7 @@
 import { verifyRequest } from "@/lib/firebaseAdmin";
 
 // אדמינים מורשים לממשק הניהול. להוספת אדמין — הוסיפו אימייל לרשימה.
-export const ADMIN_EMAILS = ["blog@powercouple.co.il", "itay@binder.co.il", "assaf@powercouple.co.il", "regev@powercouple.co.il", "katia@powercouple.co.il"];
+export const ADMIN_EMAILS = ["itay@binder.co.il", "liorrubin3@gmail.com"];
 
 export function isAdmin(email: string | undefined | null): boolean {
   if (!email) return false;

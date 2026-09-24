@@ -1,0 +1,18 @@
+node_modules/
+.next/
+.vercel/
+.env*
+!.env.example
+*.tmp.json
+*.tsbuildinfo
+next-env.d.ts
+
+.vercel
+
+# dev/temp artifacts (never commit)
+_*.tmp.*
+_*.png
+_*.pdf
+_*.tmp.txt
+_*
+*.tmp.*

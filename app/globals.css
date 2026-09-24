@@ -1,0 +1,967 @@
+/* === שפת העיצוב של דפי פאוור קאפל (warmup) === */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* === ערכת כהה (ברירת מחדל) === */
+:root {
+  --bg: #0b0d12;
+  --bg-2: #11141b;
+  --card: #161a23;
+  --line: rgba(255, 255, 255, 0.08);
+  --text: #f3f4f7;
+  --muted: #a7adba;
+  --accent: #ff3b3b;
+  --accent-2: #ff7a3b;
+  --gold: #ffc857;
+  --green: #25d366;
+
+  /* משטחים ומצבים — מוגדרים כמשתנים כדי שהערכה הבהירה תחליף אותם */
+  --surface: #0d1018;          /* שדות קלט, פאנלים פנימיים */
+  --surface-2: #1d2330;        /* צ'יפים, כפתורי אייקון */
+  --card-a: #171b25;           /* גרדיאנט הכרטיס — עליון */
+  --card-b: #0f1219;           /* גרדיאנט הכרטיס — תחתון */
+  --line-soft: rgba(255, 255, 255, 0.04);
+  --line-strong: rgba(255, 255, 255, 0.22);
+  --hover: rgba(255, 255, 255, 0.04);
+  --hover-2: rgba(255, 255, 255, 0.06);
+  --hover-soft: rgba(255, 255, 255, 0.03);
+  --spin-track: rgba(255, 255, 255, 0.3);
+  --spin-head: #fff;
+  --shadow: rgba(0, 0, 0, 0.4);
+  --glow: rgba(255, 59, 59, 0.18); /* זוהר עדין ברקע הדף */
+}
+
+/* === ערכה בהירה (אפור/חום בהיר ועדין) === */
+:root[data-theme="light"] {
+  --bg: #f5f3f0;
+  --bg-2: #ebe8e3;
+  --card: #ffffff;
+  --line: rgba(60, 50, 40, 0.14);
+  --text: #23262c;
+  --muted: #6f7480;
+  --accent: #e02b2b;
+  --accent-2: #e86a2a;
+  --gold: #b8860b;
+  --green: #1aa34a;
+
+  --surface: #ffffff;
+  --surface-2: #e7e3dd;
+  --card-a: #ffffff;
+  --card-b: #faf8f5;
+  --line-soft: rgba(60, 50, 40, 0.08);
+  --line-strong: rgba(60, 50, 40, 0.3);
+  --hover: rgba(60, 50, 40, 0.05);
+  --hover-2: rgba(60, 50, 40, 0.08);
+  --hover-soft: rgba(60, 50, 40, 0.035);
+  --spin-track: rgba(60, 50, 40, 0.18);
+  --spin-head: var(--accent);
+  --shadow: rgba(60, 50, 40, 0.16);
+  --glow: rgba(224, 43, 43, 0.07);
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  direction: rtl;
+  color: var(--text);
+  background:
+    radial-gradient(1200px 700px at 50% -10%, var(--glow), transparent 60%),
+    linear-gradient(180deg, var(--bg) 0%, var(--bg) 100%);
+  background-color: var(--bg);
+  min-height: 100vh;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.pcf-wrap {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 24px 18px 96px;
+}
+
+/* === HERO === */
+.pcf-hero {
+  text-align: center;
+  padding: 28px 8px 10px;
+}
+
+.pcf-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(90deg, #ff1f1f, #ff5a1f);
+  color: #fff;
+  font-weight: 800;
+  font-size: 14px;
+  letter-spacing: 0.5px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  box-shadow: 0 8px 24px rgba(255, 31, 31, 0.35);
+}
+
+.pcf-hero h1 {
+  font-size: clamp(24px, 4.2vw, 40px);
+  line-height: 1.25;
+  font-weight: 900;
+  margin: 18px auto 8px;
+  max-width: 700px;
+}
+
+.pcf-hero h1 u {
+  text-decoration-color: var(--accent);
+  text-underline-offset: 6px;
+}
+
+.pcf-hero p.sub {
+  color: var(--muted);
+  max-width: 600px;
+  margin: 8px auto 0;
+  font-size: clamp(14px, 1.8vw, 17px);
+}
+
+/* === CARD === */
+.pcf-card {
+  background: linear-gradient(180deg, var(--card-a) 0%, var(--card-b) 100%);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 26px 22px;
+  margin: 22px auto 0;
+  box-shadow: 0 16px 40px var(--shadow);
+}
+
+.pcf-card h2 {
+  font-size: clamp(18px, 2.6vw, 24px);
+  font-weight: 900;
+  margin: 0 0 6px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pcf-card p.lead {
+  color: var(--muted);
+  margin: 0 0 18px;
+  font-size: 15px;
+}
+
+/* === PROGRESS === */
+.pcf-progress {
+  display: flex;
+  gap: 6px;
+  margin: 26px auto 0;
+}
+
+.pcf-progress span {
+  flex: 1;
+  height: 6px;
+  border-radius: 99px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  transition: background 0.3s;
+}
+
+.pcf-progress span.done {
+  background: linear-gradient(90deg, #ff1f1f, #ff7a3b);
+  border-color: transparent;
+}
+
+.pcf-step-label {
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+/* === FORM === */
+.pcf-form {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 1fr 1fr;
+}
+
+.pcf-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.pcf-field.full {
+  grid-column: 1 / -1;
+}
+
+.pcf-field label {
+  font-size: 14px;
+  color: var(--muted);
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.pcf-field label .req {
+  color: var(--accent);
+}
+
+.pcf-field input,
+.pcf-field select,
+.pcf-field textarea {
+  width: 100%;
+  padding: 13px 14px;
+  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--text);
+  font-size: 16px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.pcf-field textarea {
+  min-height: 88px;
+  resize: vertical;
+}
+
+.pcf-field input:focus,
+.pcf-field select:focus,
+.pcf-field textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(255, 59, 59, 0.18);
+}
+
+.pcf-field input::-webkit-calendar-picker-indicator {
+  filter: var(--picker-filter, invert(0.8));
+}
+
+/* radio pills */
+.pcf-pills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pcf-pill {
+  padding: 11px 18px;
+  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.pcf-pill:hover {
+  border-color: rgba(255, 59, 59, 0.4);
+}
+
+.pcf-pill.active {
+  background: linear-gradient(90deg, rgba(255, 31, 31, 0.18), rgba(255, 122, 59, 0.18));
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+/* גרסה קומפקטית — לטאבי סינון רבים (למשל שלבי לקוח) */
+.pcf-pill.sm {
+  padding: 7px 13px;
+  font-size: 13px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+/* === BUTTONS === */
+.pcf-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: linear-gradient(90deg, #ff1f1f, #ff7a3b);
+  color: #fff;
+  font-weight: 900;
+  font-size: 17px;
+  font-family: inherit;
+  padding: 14px 26px;
+  border: 0;
+  border-radius: 14px;
+  cursor: pointer;
+  text-decoration: none;
+  box-shadow: 0 14px 36px rgba(255, 31, 31, 0.35);
+  transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+}
+
+.pcf-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 18px 42px rgba(255, 31, 31, 0.45);
+}
+
+.pcf-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.pcf-btn.ghost {
+  background: var(--surface-2);
+  box-shadow: none;
+  border: 1px solid var(--line);
+  color: var(--text);
+  font-weight: 700;
+}
+
+.pcf-btn.ghost:hover {
+  box-shadow: none;
+  border-color: var(--line-strong);
+}
+
+.pcf-btn.white {
+  background: #fff;
+  color: #1a1a1a;
+  box-shadow: 0 14px 36px var(--shadow);
+}
+
+.pcf-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 26px;
+}
+
+/* === SAVE STATE === */
+.pcf-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.pcf-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.pcf-user img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+}
+
+.pcf-save-state {
+  font-size: 13px;
+  color: var(--muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pcf-save-state.saved {
+  color: var(--green);
+}
+
+.pcf-link-btn {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+}
+
+.pcf-link-btn:hover {
+  color: var(--text);
+}
+
+/* === FILE UPLOAD === */
+.pcf-files {
+  display: grid;
+  gap: 14px;
+}
+
+.pcf-file-cat {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.pcf-file-cat-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.pcf-file-cat-head strong {
+  font-size: 15px;
+}
+
+.pcf-file-cat-head .hint {
+  color: var(--muted);
+  font-size: 13px;
+  display: block;
+  font-weight: 400;
+}
+
+.pcf-upload-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface-2);
+  border: 1px dashed var(--line-strong);
+  color: var(--text);
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 14px;
+  padding: 9px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.pcf-upload-btn:hover {
+  border-color: var(--accent);
+}
+
+.pcf-file-list {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.pcf-file-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 14px;
+}
+
+.pcf-file-item .name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  direction: ltr;
+  text-align: right;
+}
+
+.pcf-file-item .size {
+  color: var(--muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.pcf-file-item button {
+  background: none;
+  border: none;
+  color: #ff8585;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 2px 6px;
+  line-height: 1;
+}
+
+.pcf-upload-progress {
+  height: 5px;
+  border-radius: 99px;
+  background: var(--surface-2);
+  margin-top: 8px;
+  overflow: hidden;
+}
+
+.pcf-upload-progress div {
+  height: 100%;
+  background: linear-gradient(90deg, #ff1f1f, #ff7a3b);
+  transition: width 0.2s;
+}
+
+/* === MESSAGES === */
+.pcf-err {
+  color: #ff8585;
+  font-size: 14px;
+  background: rgba(255, 59, 59, 0.08);
+  border: 1px solid rgba(255, 59, 59, 0.25);
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-top: 16px;
+}
+
+.pcf-err ul {
+  margin: 6px 0 0;
+  padding-inline-start: 18px;
+}
+
+.pcf-ok {
+  color: #34d399;
+  font-size: 14px;
+  background: rgba(37, 211, 102, 0.08);
+  border: 1px solid rgba(37, 211, 102, 0.25);
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-top: 16px;
+}
+
+/* === TOP NAV (Clients / Leads / Dashboard / Settings) === */
+.pcf-topnav {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  background: var(--bg-2);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 6px;
+  margin-bottom: 20px;
+}
+/* כפתור בתפריט (מחליף הערכה) — מאפס את ברירת המחדל של הדפדפן כדי שייראה כמו שאר הפריטים */
+button.pcf-topnav-item {
+  background: transparent;
+  border: 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.pcf-topnav-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--muted);
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+}
+.pcf-topnav-item:hover {
+  color: var(--text);
+  background: var(--hover);
+}
+.pcf-topnav-item.active {
+  color: #fff;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+}
+
+.pcf-icon-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--bg-2);
+  color: inherit;
+  cursor: pointer;
+  font-size: 15px;
+  line-height: 1;
+}
+.pcf-icon-btn:hover:not(:disabled) { background: var(--hover-2); }
+.pcf-icon-btn:disabled { opacity: 0.35; cursor: default; }
+
+/* === LEADS TABLE (sort + filters) === */
+.pcf-leads-table thead th { position: sticky; top: 0; }
+.pcf-filter-row th { padding: 4px 8px !important; background: var(--bg-2); }
+.pcf-filter-row input, .pcf-filter-row select {
+  width: 100%;
+  min-width: 90px;
+  padding: 5px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: inherit;
+  font-size: 12px;
+  font-family: inherit;
+}
+
+/* === SUCCESS === */
+.pcf-success {
+  text-align: center;
+  padding: 30px 10px;
+}
+
+.pcf-success .check {
+  width: 74px;
+  height: 74px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #25d366, #1ea854);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 18px;
+  font-size: 34px;
+  box-shadow: 0 14px 36px rgba(37, 211, 102, 0.35);
+}
+
+.pcf-success h2 {
+  font-size: 26px;
+  font-weight: 900;
+  margin: 0 0 8px;
+  justify-content: center;
+}
+
+.pcf-success p {
+  color: var(--muted);
+  max-width: 440px;
+  margin: 0 auto;
+}
+
+/* === LOGIN === */
+.pcf-login {
+  text-align: center;
+  padding: 10px 0 6px;
+}
+
+.pcf-login .points {
+  display: grid;
+  gap: 10px;
+  max-width: 430px;
+  margin: 0 auto 24px;
+  text-align: right;
+}
+
+.pcf-login .point {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  color: var(--muted);
+  font-size: 15px;
+}
+
+.pcf-login .point .ic {
+  color: var(--gold);
+}
+
+/* === SPINNER === */
+.pcf-spin {
+  width: 18px;
+  height: 18px;
+  border: 3px solid var(--spin-track);
+  border-top-color: var(--spin-head);
+  border-radius: 50%;
+  animation: pcf-rot 0.8s linear infinite;
+}
+
+@keyframes pcf-rot {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.pcf-foot {
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+  margin-top: 40px;
+}
+
+/* === ADMIN === */
+.pcf-admin-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-top: 24px;
+}
+
+.pcf-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.pcf-stat {
+  background: linear-gradient(180deg, var(--card-a) 0%, var(--card-b) 100%);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 20px 16px;
+  text-align: center;
+}
+
+.pcf-stat .num {
+  font-size: 36px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.pcf-stat .lbl {
+  color: var(--muted);
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+.pcf-admin-tabhead {
+  padding: 16px 20px;
+  font-weight: 900;
+  font-size: 17px;
+  border-bottom: 1px solid var(--line);
+}
+
+.pcf-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.pcf-table thead th {
+  text-align: right;
+  padding: 12px 16px;
+  color: var(--muted);
+  font-weight: 700;
+  font-size: 13px;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+
+.pcf-table tbody td {
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--hover);
+}
+
+.pcf-table tbody tr {
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.pcf-table tbody tr:hover {
+  background: var(--hover-soft);
+}
+
+.pcf-table.answers tbody tr {
+  cursor: default;
+}
+
+.pcf-table.answers tbody tr:hover {
+  background: none;
+}
+
+.pcf-pill-status {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.pcf-pill-status.done {
+  background: rgba(37, 211, 102, 0.15);
+  color: var(--green);
+}
+
+.pcf-pill-status.draft {
+  background: rgba(255, 200, 87, 0.15);
+  color: var(--gold);
+}
+
+.pcf-pill-status.sent {
+  background: rgba(90, 160, 255, 0.15);
+  color: #5aa0ff;
+}
+
+.pcf-pill-status.wait {
+  background: rgba(180, 140, 255, 0.15);
+  color: #b48cff;
+}
+
+.pcf-pill-status.danger {
+  background: rgba(255, 80, 80, 0.15);
+  color: #ff6b6b;
+}
+
+/* === CONTRACT EDITOR === */
+.pcf-title-input {
+  display: block;
+  margin-top: 10px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--line);
+  color: var(--text);
+  font-size: 24px;
+  font-weight: 900;
+  font-family: inherit;
+  padding: 4px 0;
+  outline: none;
+  width: 320px;
+  max-width: 100%;
+}
+.pcf-title-input:focus { border-color: var(--accent); }
+
+.pcf-editor {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 18px;
+  margin-top: 20px;
+  align-items: start;
+}
+
+.pcf-editor-side {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  position: sticky;
+  top: 16px;
+}
+
+.pcf-side-card {
+  background: linear-gradient(180deg, var(--card-a) 0%, var(--card-b) 100%);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.pcf-side-title { font-weight: 800; font-size: 14px; margin-bottom: 10px; }
+.pcf-side-label { display: block; font-size: 12px; color: var(--muted); margin: 10px 0 4px; }
+.pcf-side-input {
+  width: 100%; padding: 9px 10px; border-radius: 9px; background: var(--surface);
+  border: 1px solid var(--line); color: var(--text); font-size: 14px; font-family: inherit; outline: none;
+}
+.pcf-side-input:focus { border-color: var(--accent); }
+.pcf-side-checkbox { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); margin-top: 12px; cursor: pointer; }
+
+.pcf-type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.pcf-type-btn {
+  display: flex; align-items: center; justify-content: center;
+  background: var(--surface); border: 1px solid var(--line); color: var(--text);
+  font-family: inherit; font-size: 13px; font-weight: 600; padding: 9px 6px; border-radius: 9px; cursor: pointer;
+}
+.pcf-type-btn:hover { border-color: var(--line-strong); }
+.pcf-type-btn.active { background: var(--hover-2); }
+
+.pcf-field-row {
+  display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 8px; cursor: pointer; font-size: 13px;
+}
+.pcf-field-row:hover { background: var(--hover); }
+.pcf-field-row.active { background: rgba(255, 59, 59, 0.12); }
+
+.pcf-editor-canvas {
+  display: flex; flex-direction: column; align-items: center; gap: 16px;
+  background: #0a0c10; border: 1px solid var(--line); border-radius: 14px; padding: 16px; overflow-x: auto;
+}
+.pcf-pdf-page { position: relative; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5); background: #fff; touch-action: none; }
+.pcf-field-box {
+  position: absolute; border: 2px solid; border-radius: 3px; cursor: move; box-sizing: border-box;
+  display: flex; align-items: center; justify-content: center; overflow: hidden;
+}
+.pcf-field-box.selected { box-shadow: 0 0 0 2px #fff; }
+.pcf-field-box-label { font-size: 10px; color: #111; background: rgba(255, 255, 255, 0.7); padding: 0 3px; border-radius: 2px; pointer-events: none; white-space: nowrap; }
+
+.pcf-link-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; margin-top: 10px;
+}
+.pcf-link-url { font-size: 13px; color: var(--muted); margin-top: 4px; word-break: break-all; }
+
+/* === SIGN PAGE === */
+.pcf-sign-wrap { max-width: 820px; margin: 0 auto; padding-bottom: 96px; }
+.pcf-sign-toolbar {
+  position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 12px;
+  background: rgba(11, 13, 18, 0.95); backdrop-filter: blur(6px); border-bottom: 1px solid var(--line);
+  padding: 8px 14px; justify-content: center;
+}
+.pcf-sign-toolbar button {
+  width: 38px; height: 38px; border-radius: 10px; background: var(--surface-2); border: 1px solid var(--line);
+  color: var(--text); font-size: 22px; font-weight: 700; cursor: pointer; line-height: 1;
+}
+.pcf-sign-toolbar > span { font-size: 14px; color: var(--muted); min-width: 48px; text-align: center; }
+.pcf-sign-progress { margin-inline-start: auto; font-weight: 700; color: var(--text) !important; }
+.pcf-sign-pages { display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 14px; overflow-x: auto; }
+/* בדף החתימה הדפים חייבים לאפשר גלילה ופינץ'-זום (בניגוד לעורך שחוסם לציור) */
+.pcf-sign-pages .pcf-pdf-page { touch-action: pan-x pan-y pinch-zoom; }
+.pcf-sign-fab {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 30; padding: 12px 16px;
+  background: linear-gradient(180deg, transparent, var(--bg) 30%);
+}
+.pcf-sign-fab .pcf-btn { width: 100%; max-width: 520px; margin: 0 auto; font-size: 17px; }
+.pcf-field-arrow {
+  position: absolute; top: -22px; left: 50%; transform: translateX(50%);
+  color: var(--accent); font-size: 20px; filter: drop-shadow(0 1px 2px rgba(0,0,0,.4));
+  animation: pcf-bounce 1s ease-in-out infinite; pointer-events: none; z-index: 5;
+}
+@keyframes pcf-bounce { 0%,100% { transform: translate(50%, 0); } 50% { transform: translate(50%, 6px); } }
+
+.pcf-modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 16px; }
+.pcf-modal { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 20px; width: 100%; max-width: 640px; }
+.pcf-sig-canvas { width: 100%; height: auto; background: #fff; border-radius: 10px; border: 1px solid var(--line); cursor: crosshair; }
+
+/* === MOBILE === */
+@media (max-width: 900px) {
+  .pcf-editor { grid-template-columns: 1fr; }
+  .pcf-editor-side { position: static; }
+}
+@media (max-width: 600px) {
+  .pcf-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .pcf-wrap {
+    padding: 14px 12px 80px;
+  }
+
+  .pcf-form {
+    grid-template-columns: 1fr;
+  }
+
+  .pcf-card {
+    padding: 22px 16px;
+  }
+
+  .pcf-nav {
+    flex-direction: column-reverse;
+  }
+
+  .pcf-nav .pcf-btn {
+    width: 100%;
+  }
+}
+
+/* בורר התאריך לא הפוך בערכה הבהירה */
+:root[data-theme="light"] { --picker-filter: none; }
+
+/* לוחות האדמין — רחבים בדסקטופ (הטבלאות צריכות מקום) */
+@media (min-width: 1100px) {
+  .pcf-wrap.pcf-wide { max-width: 92vw; }
+}
+
+/* דף ביצועים — רשימת שמות + רשת פילוחים */
+.pcf-names { columns: 3; column-gap: 22px; }
+.pcf-names > div { break-inside: avoid; display: flex; justify-content: space-between; gap: 8px; font-size: 13.5px; padding: 5px 0; border-bottom: 1px solid var(--line); }
+.pcf-names > div small { color: var(--muted); font-size: 12px; }
+.pcf-names > div.ret { background: rgba(255,200,87,.10); padding: 6px 8px; border-radius: 8px; border: 0; margin-bottom: 4px; }
+@media (max-width: 820px) { .pcf-perf-grid { grid-template-columns: 1fr !important; } .pcf-names { columns: 2; } }
+@media (max-width: 520px) { .pcf-names { columns: 1; } }
+
+/* בורר שלב בתוך טבלת הלקוחות — נראה כמו צ'יפ, נערך במקום */
+.pcf-stage-sel {
+  appearance: none; -webkit-appearance: none;
+  border: 1px solid transparent; border-radius: 999px;
+  padding: 4px 26px 4px 10px; font-size: 12px; font-weight: 700;
+  font-family: inherit; cursor: pointer; white-space: nowrap;
+  background-repeat: no-repeat; background-position: left 8px center; background-size: 8px;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'><path d='M1 1l4 4 4-4' fill='none' stroke='%23999' stroke-width='1.5'/></svg>");
+  transition: filter .15s, border-color .15s;
+}
+.pcf-stage-sel:hover:not(:disabled) { border-color: var(--line-strong); filter: brightness(1.08); }
+.pcf-stage-sel:disabled { opacity: .5; cursor: wait; }
+.pcf-stage-sel:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.pcf-stage-sel option { background: var(--surface); color: var(--text); font-weight: 600; }
+.pcf-stage-sel.draft { background-color: rgba(255,200,87,.15); color: var(--gold); }
+.pcf-stage-sel.wait  { background-color: rgba(180,140,255,.15); color: #b48cff; }
+.pcf-stage-sel.sent  { background-color: rgba(90,160,255,.15); color: #5aa0ff; }
+.pcf-stage-sel.done  { background-color: rgba(37,211,102,.15); color: var(--green); }

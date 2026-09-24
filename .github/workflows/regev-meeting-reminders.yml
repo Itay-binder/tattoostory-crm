@@ -1,0 +1,40 @@
+name: Regev Meeting Reminders
+
+# סוכן תזכורות פגישות — שולח ווצאפ ללקוחות עם פגישה היום ביומן regev@powercouple.co.il.
+# רץ כל בוקר 09:00 שעון ישראל. שני ה-cron (06:00/07:00 UTC) מכסים קיץ/חורף,
+# והסקריפט מוודא שהשעה בישראל היא 09 (REMINDER_ONLY_HOUR) כדי לרוץ פעם אחת בלבד.
+
+on:
+  # התזמון עבר ל-Vercel Cron (אמין יותר) — ראה vercel.json + app/api/cron/meeting-reminders.
+  # כאן נשארת רק הפעלה ידנית כגיבוי.
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "מצב הרצה ידני: dry (סריקה), test (מבחן לאיתי), send (שליחה חיה)"
+        default: "dry"
+        type: choice
+        options: ["dry", "test", "send"]
+
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install deps
+        run: npm ci
+      - name: Run reminder agent
+        run: |
+          ARG=""
+          if [ "${{ github.event_name }}" = "schedule" ]; then ARG="--send"; fi
+          if [ "${{ github.event.inputs.mode }}" = "send" ]; then ARG="--send"; fi
+          if [ "${{ github.event.inputs.mode }}" = "test" ]; then ARG="--test"; fi
+          echo "Running with ARG='$ARG'"
+          node scripts/regev-meeting-reminders.mjs $ARG
+        env:
+          GOOGLE_SA_B64: ${{ secrets.GOOGLE_SA_B64 }}
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          PC_GREENAPI_REGEV_INSTANCE: ${{ secrets.PC_GREENAPI_REGEV_INSTANCE }}
+          PC_GREENAPI_REGEV_TOKEN: ${{ secrets.PC_GREENAPI_REGEV_TOKEN }}

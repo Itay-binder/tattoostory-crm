@@ -5,6 +5,7 @@ import Link from "next/link";
 import { onAuthStateChanged, signInWithPopup, setPersistence, browserLocalPersistence, firebaseAuth, googleProvider, type User } from "@/lib/authClient";
 import { COMPASS_STATUSES, compassStatusLabel, type CompassStatus, type Lead } from "@/lib/leads";
 import AdminNav from "../AdminNav";
+import WhatsappButton from "../WhatsappButton";
 import ActivityText from "../ActivityText";
 
 function fmtDate(s: string): string {
@@ -139,7 +140,7 @@ export default function CompassPage() {
                       <Link href={`/admin/leads/${m.id}`} style={{ fontSize: 19, fontWeight: 700, color: "inherit", textDecoration: "none" }}>{m.fullName || "(ליד ללא שם)"}</Link>
                     </div>
                     <div style={{ color: "var(--muted)", fontSize: 14, marginTop: 6, display: "flex", gap: 14, flexWrap: "wrap" }}>
-                      {m.phone && <span dir="ltr">📞 {m.phone}</span>}
+                      {m.phone && <span dir="ltr" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>📞 {m.phone}<WhatsappButton phone={m.phone} name={m.fullName} size={24} /></span>}
                       {m.email && <span dir="ltr">✉ {m.email}</span>}
                       <span>נכנס: {fmtDate(m.compassEnteredAt || "")}</span>
                     </div>

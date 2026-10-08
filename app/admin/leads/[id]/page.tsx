@@ -7,6 +7,7 @@ import { LEAD_STAGES, QUALI_FIELDS, UTM_FIELDS, CALL_REQUEST_STATUSES, stageLabe
 import { SECTIONS } from "@/lib/formSchema";
 import { REPS } from "@/lib/reps";
 import AdminNav from "../../AdminNav";
+import WhatsappButton from "../../WhatsappButton";
 import ActivityText from "../../ActivityText";
 
 function fmtDate(s: string): string {
@@ -280,6 +281,9 @@ export default function LeadDetail({ params }: { params: Promise<{ id: string }>
           </select>
           <button className="pcf-btn" style={{ padding: "9px 16px", fontSize: 14 }} onClick={requestCall} disabled={callBusy || !lead.phone} title={!lead.phone ? "אין מספר טלפון" : "בקש חיוג מהפלאפון"}>{callBusy ? "שולח…" : "📞 חייג בפלאפון"}</button>
           <button className="pcf-btn" style={{ padding: "9px 16px", fontSize: 14 }} onClick={() => { setWaOpen((o) => !o); setMsg(null); }}>💬 שלח בווצאפ</button>
+          <span title="פתח את שיחת הווצאפ עם הליד" style={{ display: "inline-flex", alignItems: "center" }}>
+            <WhatsappButton phone={lead.phone} name={lead.fullName} size={34} />
+          </span>
           <button className="pcf-btn ghost" style={{ padding: "9px 16px", fontSize: 14 }} onClick={() => { setMeetOpen((o) => !o); setMsg(null); setConflict(null); }}>📅 תאם פגישה</button>
           {lead.convertedClientUid
             ? <Link className="pcf-btn ghost" style={{ padding: "9px 16px", fontSize: 14 }} href={`/admin/${lead.convertedClientUid}`}>👥 צפה בלקוח</Link>

@@ -14,6 +14,9 @@ import {
   type LeadStage,
   type CompassStatus,
   compassStatusLabel,
+  FOLLOWUP_STAGES,
+  FOLLOWUP_EXCLUDED_STAGES,
+  FOLLOWUP_COMPASS,
   deriveFullName,
   normalizeEmail,
   isDistributionLead,
@@ -148,6 +151,7 @@ export interface LeadsQuery {
   sortKey?: string;
   sortDir?: "asc" | "desc";
   category?: "sales" | "distribution";  // מכירות (ברירת מחדל) או רשימות תפוצה
+  scope?: "followups";                  // מאגר הפולואפים במקום כל הלידים
 }
 
 /** מגביל שאילתה לקטגוריה: מכירות (category='sales') או רשימות תפוצה (distribution_last_at≠null). */
@@ -155,6 +159,21 @@ function scopeCategory(qb: Qb, category?: string): Qb {
   return category === "distribution"
     ? qb.not("distribution_last_at", "is", null)
     : qb.eq("category", "sales");
+}
+
+/**
+ * מגביל למאגר הפולואפים: ליד חי שיצרנו איתו קשר וטרם נסגר/נפסל,
+ * או ליד שהיתה לו פגישת התאמה והוא טרם התקדם.
+ */
+function scopeFollowups(qb: Qb): Qb {
+  return qb
+    .or(`stage.in.(${FOLLOWUP_STAGES.join(",")}),compass_status.in.(${FOLLOWUP_COMPASS.join(",")})`)
+    .not("stage", "in", `(${FOLLOWUP_EXCLUDED_STAGES.join(",")})`);
+}
+
+/** מחיל את ה-scope המבוקש (קטגוריה או מאגר הפולואפים). */
+function scopeOf(qb: Qb, q: LeadsQuery): Qb {
+  return q.scope === "followups" ? scopeFollowups(scopeCategory(qb, "sales")) : scopeCategory(qb, q.category);
 }
 
 export interface LeadsPage {
@@ -203,6 +222,30 @@ function applyFilters(qb: Qb, filters: Record<string, string>): Qb {
   return qb;
 }
 
+export interface LastNote { text: string; by: string; at: string; type: string }
+
+/**
+ * התיעוד האחרון לכל ליד מתוך רשימה — לעמודת "תיעוד אחרון" במסך הפולואפים.
+ * שאילתה אחת לכל העמוד (50 שורות), לא אחת לכל ליד.
+ */
+export async function lastNotesFor(leadIds: string[]): Promise<Record<string, LastNote>> {
+  if (!leadIds.length) return {};
+  const { data, error } = await supa()
+    .from("lead_activity")
+    .select("lead_id,type,at,by_actor,text")
+    .in("lead_id", leadIds)
+    .in("type", ["note", "stage", "system"])
+    .order("at", { ascending: false });
+  if (error) throw new Error(error.message);
+  const out: Record<string, LastNote> = {};
+  for (const r of (data || []) as { lead_id: string; type: string; at: string; by_actor: string | null; text: string | null }[]) {
+    if (out[r.lead_id]) continue;                 // כבר יש — זו הרשומה האחרונה
+    if (!(r.text || "").trim()) continue;         // רשומה בלי טקסט לא מעניינת כאן
+    out[r.lead_id] = { text: r.text || "", by: r.by_actor || "", at: r.at, type: r.type };
+  }
+  return out;
+}
+
 export async function listLeadsPage(q: LeadsQuery = {}): Promise<LeadsPage> {
   const page = Math.max(1, q.page || 1);
   const pageSize = LEADS_PAGE_SIZE;
@@ -214,7 +257,7 @@ export async function listLeadsPage(q: LeadsQuery = {}): Promise<LeadsPage> {
   const ascending = q.sortDir === "asc";
 
   // ספירת התצוגה הנוכחית (פילטרים + שלבים) — כדי לתחום את העמוד ולא לבקש טווח מעבר לקיים
-  let viewCountQb = scopeCategory(applyFilters(supa().from("leads").select("id", { count: "exact", head: true }), filters), q.category);
+  let viewCountQb = scopeOf(applyFilters(supa().from("leads").select("id", { count: "exact", head: true }), filters), q);
   if (stages.length) viewCountQb = viewCountQb.in("stage", stages);
   const { count: viewCount0, error: vErr } = await viewCountQb;
   if (vErr) throw new Error(vErr.message);
@@ -228,7 +271,7 @@ export async function listLeadsPage(q: LeadsQuery = {}): Promise<LeadsPage> {
 
   let data: unknown[] = [];
   if (viewCount > 0) {
-    let rowsQb = scopeCategory(applyFilters(supa().from("leads").select(SEL_LIST), filters), q.category);
+    let rowsQb = scopeOf(applyFilters(supa().from("leads").select(SEL_LIST), filters), q);
     if (stages.length) rowsQb = rowsQb.in("stage", stages);
     const res = await rowsQb.order(sortCol, { ascending, nullsFirst: false }).range(from, from + pageSize - 1);
     if (res.error) throw new Error(res.error.message);
@@ -237,7 +280,7 @@ export async function listLeadsPage(q: LeadsQuery = {}): Promise<LeadsPage> {
 
   // מוני הטאבים — ספירות בלבד (head:true), בלי להעביר שורות ברשת.
   const countFor = async (stageKey: string | null): Promise<number> => {
-    let qb = scopeCategory(applyFilters(supa().from("leads").select("id", { count: "exact", head: true }), filters), q.category);
+    let qb = scopeOf(applyFilters(supa().from("leads").select("id", { count: "exact", head: true }), filters), q);
     if (stageKey) qb = qb.eq("stage", stageKey);
     const { count: c, error: e } = await qb;
     if (e) throw new Error(e.message);

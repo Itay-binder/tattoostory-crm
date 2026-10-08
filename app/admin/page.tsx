@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { onAuthStateChanged, signInWithPopup, setPersistence, browserLocalPersistence, signOut, firebaseAuth, googleProvider, type User } from "@/lib/authClient";
 import { CLIENT_STAGES, CLIENT_STAGE_KIND, CLIENT_PACES, clientStageLabel } from "@/lib/clients";
 import { phoneCore } from "@/lib/reps";
+import WhatsappButton from "./WhatsappButton";
 import AdminNav from "./AdminNav";
 
 const CONTRACT_STATUSES = ["טרם הופק הסכם", "הופק הסכם", "ממתין לחתימות", "נחתם"];
@@ -258,12 +259,13 @@ export default function AdminDashboard() {
             <div style={{ overflowX: "auto" }}>
               <table className="pcf-table pcf-leads-table">
                 <thead>
-                  <tr><th>שם</th><th>טלפון</th><th>אימייל</th><th>שלב</th><th>סטטוס</th><th>הסכם</th><th>התקדמות</th><th>קבצים</th><th>⚡ קצב</th><th>עדכון קצב</th>
+                  <tr><th>שם</th><th>ווצאפ</th><th>טלפון</th><th>אימייל</th><th>שלב</th><th>סטטוס</th><th>הסכם</th><th>התקדמות</th><th>קבצים</th><th>⚡ קצב</th><th>עדכון קצב</th>
                     <th style={{ cursor: "pointer", whiteSpace: "nowrap" }} onClick={() => toggleSort("clientSince")}>קליטה כלקוח {sortKey === "clientSince" ? (sortDir === "desc" ? "▼" : "▲") : ""}</th>
                     <th style={{ cursor: "pointer", whiteSpace: "nowrap" }} onClick={() => toggleSort("updatedAt")}>עודכן {sortKey === "updatedAt" ? (sortDir === "desc" ? "▼" : "▲") : ""}</th>
                     <th></th></tr>
                   <tr className="pcf-filter-row">
                     <th><input value={filters.fullName || ""} onChange={(e) => setFilter("fullName", e.target.value)} placeholder="סינון…" /></th>
+                    <th />
                     <th><input value={filters.phone || ""} onChange={(e) => setFilter("phone", e.target.value)} placeholder="סינון…" /></th>
                     <th><input value={filters.email || ""} onChange={(e) => setFilter("email", e.target.value)} placeholder="סינון…" /></th>
                     <th>
@@ -291,6 +293,7 @@ export default function AdminDashboard() {
                   {pagedRows.map((c) => (
                     <tr key={c.uid} onClick={() => (window.location.href = `/admin/${c.uid}`)}>
                       <td><b>{c.fullName || "(ללא שם)"}</b></td>
+                      <td onClick={(e) => e.stopPropagation()}><WhatsappButton phone={c.phone} name={c.fullName} /></td>
                       <td dir="ltr" style={{ textAlign: "right" }}>{c.phone || "—"}</td>
                       <td dir="ltr" style={{ textAlign: "right" }}>{c.email}</td>
                       <td onClick={(e) => e.stopPropagation()}>
@@ -322,7 +325,7 @@ export default function AdminDashboard() {
                       </td>
                     </tr>
                   ))}
-                  {rows.length === 0 && <tr><td colSpan={13} style={{ textAlign: "center", padding: 30, color: "var(--muted)" }}>אין לקוחות תואמים</td></tr>}
+                  {rows.length === 0 && <tr><td colSpan={14} style={{ textAlign: "center", padding: 30, color: "var(--muted)" }}>אין לקוחות תואמים</td></tr>}
                 </tbody>
               </table>
             </div>

@@ -6,6 +6,7 @@ import { onAuthStateChanged, signInWithPopup, setPersistence, browserLocalPersis
 import { LEAD_SOURCES, LEAD_STAGES, QUICK_FILTER_STAGES, QUALI_FIELDS, UTM_FIELDS, stageLabel, leadTempEmoji, type Lead } from "@/lib/leads";
 import { REPS, repByEmail } from "@/lib/reps";
 import AdminNav from "../AdminNav";
+import WhatsappButton from "../WhatsappButton";
 
 /** עיגול צבעוני עם ראשי התיבות של הנציג. */
 function RepAvatar({ email }: { email?: string }) {
@@ -32,6 +33,7 @@ interface Column { key: string; label: string; get: (l: Lead) => string; isDate?
 
 const CORE_COLUMNS: Column[] = [
   { key: "fullName", label: "שם", get: (l) => `${leadTempEmoji(l.custom?.submit_count)} ${l.fullName}`.trim(), kind: "core" },
+  { key: "whatsapp", label: "ווצאפ", get: (l) => l.phone, kind: "core" },
   { key: "firstName", label: "שם פרטי", get: (l) => l.firstName, kind: "core" },
   { key: "lastName", label: "שם משפחה", get: (l) => l.lastName, kind: "core" },
   { key: "phone", label: "טלפון", get: (l) => l.phone, kind: "core" },
@@ -44,7 +46,7 @@ const CORE_COLUMNS: Column[] = [
   { key: "lastLeadAt", label: "קליטה אחרונה", get: (l) => l.lastLeadAt, isDate: true, kind: "meta" },
   { key: "custom.landingpage", label: "דף נחיתה", get: (l) => l.custom?.landingpage || "", kind: "custom" },
 ];
-const DEFAULT_VISIBLE = ["fullName", "phone", "email", "quali.source", "stage", "updatedAt"];
+const DEFAULT_VISIBLE = ["fullName", "whatsapp", "phone", "email", "quali.source", "stage", "updatedAt"];
 
 export default function LeadsPage() {
   const [user, setUser] = useState<User | null>(null);
@@ -349,7 +351,7 @@ export default function LeadsPage() {
               <thead>
                 <tr>
                   {visibleCols.map((c) => (
-                    <th key={c.key} onClick={() => setSort(c.key)} style={{ cursor: "pointer", whiteSpace: "nowrap" }}>
+                    <th key={c.key} onClick={() => { if (c.key !== "whatsapp") setSort(c.key); }} style={{ cursor: c.key === "whatsapp" ? "default" : "pointer", whiteSpace: "nowrap" }}>
                       {c.label}{sortKey === c.key ? (sortDir === "asc" ? " ▲" : " ▼") : ""}
                     </th>
                   ))}
@@ -373,7 +375,7 @@ export default function LeadsPage() {
                           <option value="">הכל</option>
                           {REPS.map((r) => <option key={r.email} value={r.name}>{r.name}</option>)}
                         </select>
-                      ) : (
+                      ) : c.key === "whatsapp" ? null : (
                         <input value={filters[c.key] || ""} onChange={(e) => setFilter(c.key, e.target.value)} placeholder="סינון…" />
                       )}
                     </th>
@@ -387,6 +389,7 @@ export default function LeadsPage() {
                     {visibleCols.map((c) => (
                       <td key={c.key} dir={c.key === "phone" || c.key === "email" ? "ltr" : undefined} style={{ textAlign: "right", whiteSpace: "nowrap" }}>
                         {c.key === "fullName" ? <b>{l.fullName || "(ללא שם)"}</b>
+                          : c.key === "whatsapp" ? <WhatsappButton phone={l.phone} name={l.fullName} />
                           : c.key === "stage" ? <span className={`pcf-pill-status ${STAGE_COLORS[l.stage] || "draft"}`}>{stageLabel(l.stage)}</span>
                           : c.key === "assignedTo" ? <RepAvatar email={l.assignedTo} />
                           : c.isDate ? fmtDate(c.get(l)) : (c.get(l) || "—")}

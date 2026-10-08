@@ -57,6 +57,21 @@ export function leadTempEmoji(submitCount: number | string | undefined): string 
 }
 
 /**
+ * מאגר הפולואפים — ליד חי שיצרנו איתו קשר וטרם נסגר או נפסל.
+ * זהו הקהל של מסך "פולואפים", שיושב בין הלידים לפגישות ההתאמה.
+ */
+export const FOLLOWUP_STAGES: readonly string[] = [
+  "contacted", "no_answer_1", "no_answer_2", "no_answer_3",
+  "followup", "watching", "relevant", "meeting_scheduled", "in_process",
+];
+
+/** שלבים שיצאו מהמעקב — נסגרו, נפסלו, או ייבוא היסטורי. */
+export const FOLLOWUP_EXCLUDED_STAGES: readonly string[] = ["won", "lost", "done", "dormant", "pipe", "won_pipe"];
+
+/** סטטוסי פגישת התאמה שמעידים שהיתה פגישה אבל טרם היתה התקדמות. */
+export const FOLLOWUP_COMPASS: readonly string[] = ["not_scheduled", "met_no_progress"];
+
+/**
  * שלבים שלא מוצגים כטאב סינון מהיר במסך הלידים (עדיין קיימים במשפך ובדשבורד).
  * שלבי "התהליך" מנוהלים בלקוחות/עסקאות, לא במסך הלידים.
  */

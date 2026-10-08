@@ -6,10 +6,11 @@ import { usePathname } from "next/navigation";
 import { onAuthStateChanged, firebaseAuth } from "@/lib/authClient";
 import ThemeToggle from "./ThemeToggle";
 
-const OTHER_PREFIXES = ["/admin/leads", "/admin/matching", "/admin/dashboard", "/admin/performance", "/admin/settings", "/admin/templates", "/admin/manychat", "/admin/whatsapp"];
+const OTHER_PREFIXES = ["/admin/leads", "/admin/followups", "/admin/matching", "/admin/dashboard", "/admin/performance", "/admin/settings", "/admin/templates", "/admin/manychat", "/admin/whatsapp"];
 const TABS = [
   { href: "/admin/dashboard", label: "דשבורד", icon: "📊", countKey: "", match: (p: string) => p.startsWith("/admin/dashboard") },
   { href: "/admin/leads", label: "לידים", icon: "🎯", countKey: "leads", match: (p: string) => p.startsWith("/admin/leads") },
+  { href: "/admin/followups", label: "פולואפים", icon: "⏰", countKey: "followups", match: (p: string) => p.startsWith("/admin/followups") },
   { href: "/admin/matching", label: "פגישות התאמה", icon: "🧭", countKey: "matching", match: (p: string) => p.startsWith("/admin/matching") },
   { href: "/admin", label: "לקוחות", icon: "👥", countKey: "clients", match: (p: string) => p === "/admin" || (p.startsWith("/admin/") && !OTHER_PREFIXES.some((pre) => p.startsWith(pre))) },
   { href: "/admin/manychat", label: "מאניצ'אט", icon: "💬", countKey: "", match: (p: string) => p.startsWith("/admin/manychat") },
@@ -19,7 +20,7 @@ const TABS = [
 
 export default function AdminNav() {
   const pathname = usePathname() || "/admin";
-  const [counts, setCounts] = useState<{ leads?: number; clients?: number; matching?: number }>({});
+  const [counts, setCounts] = useState<{ leads?: number; clients?: number; followups?: number; matching?: number }>({});
 
   useEffect(() => {
     const unsub = onAuthStateChanged(firebaseAuth(), async (u) => {

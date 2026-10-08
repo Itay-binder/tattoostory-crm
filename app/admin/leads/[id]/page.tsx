@@ -464,7 +464,7 @@ export default function LeadDetail({ params }: { params: Promise<{ id: string }>
             <div key={a.id} style={{ border: "1px solid var(--line)", borderRadius: 10, padding: "10px 14px", background: "var(--bg)" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, marginBottom: 4 }}>
                 <span style={{ fontSize: 12, color: "var(--muted)", fontWeight: 600 }}>
-                  {ACT_ICON[a.type] || "•"} {ACT_LABEL[a.type] || a.type} · {a.source === "api" ? "API" : a.source === "csv" ? "CSV" : a.by} · {fmtDate(a.at)}
+                  {ACT_ICON[a.type] || "•"} {ACT_LABEL[a.type] || a.type} · {a.by || (a.source === "api" ? "API" : a.source === "csv" ? "ייבוא" : a.source)} · {fmtDate(a.at)}
                 </span>
                 {a.type === "note" && <button className="pcf-link-btn" style={{ fontSize: 12, color: "var(--muted)" }} onClick={() => deleteNote(a.id)}>מחיקה</button>}
               </div>

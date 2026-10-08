@@ -10,10 +10,17 @@ export interface Rep {
 export const REPS: Rep[] = [
   { email: "liorrubin3@gmail.com", name: "ליאור רובין", initials: "לר", color: "#6e8478" },
   { email: "itay@binder.co.il", name: "איתי בינדר", initials: "אב", color: "#8B4708" },
-  // מתאמות הפגישות — להוסיף כאן את המייל שלהן כשייפתח להן חשבון
-  // (צריך להוסיף את אותו מייל גם ל-ADMIN_EMAILS ב-lib/admin.ts):
-  // { email: "", name: "ליהי", initials: "לי", color: "#3b82f6" },
-  // { email: "", name: "שיר", initials: "שי", color: "#a855f7" },
+  // מתאמות הפגישות כפי שתועדו בגיליון. המזהה אינו מייל אמיתי אלא תווית תצוגה
+  // (rep:<slug>) — כדי לא להמציא כתובות. כשייפתח חשבון אמיתי לנציגה: להחליף כאן
+  // את המזהה במייל שלה, להוסיף אותו גם ל-ADMIN_EMAILS ב-lib/admin.ts,
+  // ולהריץ:  update leads set assigned_to = '<המייל>' where assigned_to = 'rep:<slug>';
+  { email: "rep:shir", name: "שיר", initials: "שי", color: "#a855f7" },
+  { email: "rep:lihi", name: "ליהי", initials: "לי", color: "#3b82f6" },
+  { email: "rep:gili", name: "גילי", initials: "גי", color: "#14b8a6" },
+  { email: "rep:noam", name: "נעם", initials: "נע", color: "#f59e0b" },
+  { email: "rep:yahali", name: "יהלי", initials: "יה", color: "#ec4899" },
+  { email: "rep:inbal", name: "ענבל", initials: "ענ", color: "#22c55e" },
+  { email: "rep:almog", name: "אלמוג", initials: "אל", color: "#64748b" },
 ];
 
 export function repByEmail(email?: string | null): Rep | null {

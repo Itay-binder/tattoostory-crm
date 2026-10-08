@@ -4,14 +4,14 @@ import { normalizeIsraeliPhone } from "@/lib/leads";
 
 export { normalizeIsraeliPhone };
 
-// יעד ברירת מחדל — מיק (פאוור קאפל). ניתן לעקיפה דרך env.
-const DEFAULT_TO = "972542226289";
+// יעד ברירת מחדל להתראות — איתי. ניתן לעקיפה דרך env (WHATSAPP_NOTIFY_TO).
+const DEFAULT_TO = "972526660006";
 
 // נמענים קבועים לשליחת קישורי חתימה / התראות
 export const WA_CONTACTS = {
-  mik: { label: "מיק", chatId: "972542226289@c.us" },
-  dean: { label: "דין", chatId: "972528777824@c.us" },
-  hamal: { label: "חמל פאוור", chatId: "120363408113059883@g.us" },
+  itay: { label: "איתי", chatId: "972526660006@c.us" },
+  // להוסיף את המספר של ליאור כאן כשיהיה:
+  // lior: { label: "ליאור", chatId: "972XXXXXXXXX@c.us" },
 } as const;
 
 /** ממיר קלט יעד ל-chatId של GreenAPI: קבוצה (@g.us) כמו שהיא, אחרת טלפון מנורמל + @c.us. */
@@ -66,12 +66,12 @@ export function buildClientWhatsappMessage(opts: {
   return lines.join("\n").trim();
 }
 
-/** שולח הודעת טקסט דרך GreenAPI של פאוור קאפל. מחזיר את מזהה ההודעה. */
-export async function sendPowerCoupleWhatsapp(input: { to?: string; text: string }): Promise<{ idMessage: string }> {
-  const instance = env("PC_GREENAPI_INSTANCE");
-  const token = env("PC_GREENAPI_TOKEN");
-  const base = (env("PC_GREENAPI_BASE") || "https://api.green-api.com").replace(/\/+$/, "");
-  if (!instance || !token) throw new Error("GreenAPI של פאוור קאפל לא מוגדר (PC_GREENAPI_INSTANCE / PC_GREENAPI_TOKEN)");
+/** שולח הודעת טקסט דרך GreenAPI של Tattoo Story. מחזיר את מזהה ההודעה. */
+export async function sendBusinessWhatsapp(input: { to?: string; text: string }): Promise<{ idMessage: string }> {
+  const instance = env("GREENAPI_INSTANCE");
+  const token = env("GREENAPI_TOKEN");
+  const base = (env("GREENAPI_BASE") || "https://api.green-api.com").replace(/\/+$/, "");
+  if (!instance || !token) throw new Error("GreenAPI לא מוגדר (GREENAPI_INSTANCE / GREENAPI_TOKEN)");
 
   const chatId = toChatId(input.to || env("WHATSAPP_NOTIFY_TO") || DEFAULT_TO);
   const text = input.text.trim();

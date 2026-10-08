@@ -66,9 +66,9 @@ async function apiPost(path: string, dataParams: Record<string, string>) {
 function originAllowed(src: string): boolean {
   try {
     const h = new URL(src).hostname.toLowerCase();
-    return h === "powercouple.co.il" || h.endsWith(".powercouple.co.il") || h.endsWith(".vercel.app");
+    return h === "tattoostoryacademy.com" || h.endsWith(".tattoostoryacademy.com") || h.endsWith(".vercel.app");
   } catch {
-    return /(^|\/\/|\.)(powercouple\.co\.il|vercel\.app)([/:]|$)/i.test(src);
+    return /(^|\/\/|\.)(tattoostoryacademy\.com|vercel\.app)([/:]|$)/i.test(src);
   }
 }
 

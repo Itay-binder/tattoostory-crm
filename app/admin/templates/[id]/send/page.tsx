@@ -22,7 +22,7 @@ export default function SendPage({ params }: { params: Promise<{ id: string }> }
   const [envelopeId, setEnvelopeId] = useState("");
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
-  const [waSel, setWaSel] = useState<Record<string, boolean>>({ mik: false, dean: false, hamal: false, client: true });
+  const [waSel, setWaSel] = useState<Record<string, boolean>>({ itay: false, client: true });
   const [waOther1, setWaOther1] = useState("");
   const [waOther2, setWaOther2] = useState("");
   const [waBusy, setWaBusy] = useState(false);
@@ -94,9 +94,7 @@ export default function SendPage({ params }: { params: Promise<{ id: string }> }
 
   const WA_OPTS: { key: string; label: string }[] = [
     { key: "client", label: "הלקוח שחותם" },
-    { key: "mik", label: "מיק" },
-    { key: "dean", label: "דין" },
-    { key: "hamal", label: "חמל פאוור (קבוצה)" },
+    { key: "itay", label: "איתי" },
   ];
 
   if (!ready) return <main className="pcf-wrap"><div className="pcf-spin" style={{ margin: "60px auto" }} /></main>;
@@ -123,7 +121,7 @@ export default function SendPage({ params }: { params: Promise<{ id: string }> }
         {/* שליחת הקישורים בווצאפ */}
         <div className="pcf-card" style={{ marginTop: 16 }}>
           <h2 style={{ marginTop: 0 }}><span>💬</span> שליחת הקישורים בווצאפ</h2>
-          <p className="lead" style={{ fontSize: 13 }}>נשלח מהמספר של פאוור קאפל. לנמענים קבועים נשלחת רשימת כל הקישורים; ל"לקוח שחותם" נשלח לכל חותם הקישור האישי שלו (לפי הטלפון שנרשם).</p>
+          <p className="lead" style={{ fontSize: 13 }}>נשלח מהמספר של Tattoo Story. לנמענים קבועים נשלחת רשימת כל הקישורים; ל"לקוח שחותם" נשלח לכל חותם הקישור האישי שלו (לפי הטלפון שנרשם).</p>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginTop: 6 }}>
             {WA_OPTS.map((o) => (
               <label key={o.key} className={`pcf-pill${waSel[o.key] ? " active" : ""}`} style={{ cursor: "pointer", userSelect: "none" }}>

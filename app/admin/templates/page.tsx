@@ -54,7 +54,7 @@ export default function TemplatesPage() {
   if (!ready) return <main className="pcf-wrap"><div className="pcf-spin" style={{ margin: "60px auto" }} /></main>;
   if (!user) return (
     <main className="pcf-wrap">
-      <header className="pcf-hero"><span className="pcf-badge">ניהול • פאוור קאפל</span><h1>כניסת מנהלים</h1></header>
+      <header className="pcf-hero"><span className="pcf-badge">ניהול • Tattoo Story</span><h1>כניסת מנהלים</h1></header>
       <div className="pcf-card pcf-login"><button className="pcf-btn white" onClick={login}>התחברות עם Google</button></div>
     </main>
   );

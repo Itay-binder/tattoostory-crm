@@ -6,7 +6,7 @@ import { metaInsights } from "@/lib/metaInsights";
 export const runtime = "nodejs";
 export const maxDuration = 30;
 
-// לידים שיובאו מגיליון פגישות המצפן (ואינם Optione) — מוחרגים מספירת הקליטות האמיתיות
+// לידים שיובאו מגיליון פגישות ההתאמה (ואינם Optione) — מוחרגים מספירת הקליטות האמיתיות
 const EXCL = "(l.id in (select lead_id from lead_activity where by_actor='ייבוא גיליון') and coalesce(l.custom->>'lead_source_system','') <> 'Optione')";
 
 function isoDate(d: Date): string {

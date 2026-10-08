@@ -104,7 +104,7 @@ export default function SignPage({ params }: { params: Promise<{ token: string }
 
   if (done) return (
     <main className="pcf-wrap">
-      <header className="pcf-hero"><span className="pcf-badge">פאוור קאפל • דין ומיק</span></header>
+      <header className="pcf-hero"><span className="pcf-badge">Tattoo Story Academy</span></header>
       <div className="pcf-card pcf-success"><div className="check">✓</div><h2>החתימה נקלטה!</h2><p>תודה {data.signerName}. ההסכם נשמר וכל הצדדים יקבלו עותק חתום.</p></div>
     </main>
   );
@@ -116,7 +116,7 @@ export default function SignPage({ params }: { params: Promise<{ token: string }
   return (
     <main className="pcf-sign-wrap">
       <header style={{ textAlign: "center", padding: "16px 12px 8px" }}>
-        <span className="pcf-badge">פאוור קאפל • דין ומיק</span>
+        <span className="pcf-badge">Tattoo Story Academy</span>
         <h1 style={{ fontSize: 20, margin: "10px 0 2px" }}>{data.templateName}</h1>
         <p className="sub" style={{ fontSize: 13 }}>שלום {data.signerName}, מלא את השדות המסומנים וחתום.</p>
       </header>

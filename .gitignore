@@ -16,3 +16,4 @@ _*.pdf
 _*.tmp.txt
 _*
 *.tmp.*
+_legacy-backup/

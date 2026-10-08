@@ -71,7 +71,7 @@ export async function GET(req: Request) {
   const prog = computeProgress(answers);
   const questionnairePct = prog.total ? Math.round((prog.answered / prog.total) * 100) : 0;
 
-  // ── מצב מצפן + סיכום פגישה ──
+  // ── מצב פגישת ההתאמה + סיכום פגישה ──
   const compassStatus = lead?.compassStatus || null;
   let compassSummary: string | null = null;
   if (lead) {
@@ -79,7 +79,7 @@ export async function GET(req: Request) {
       .select("text,by_actor,at").eq("lead_id", lead.id).eq("type", "note")
       .order("at", { ascending: false }).limit(50);
     const summary = ((acts as { text: string | null; by_actor: string }[]) || [])
-      .find((a) => a.text && /מצפן|סיכום|פגיש/.test(a.text) && !/רשימת תפוצה/.test(a.text));
+      .find((a) => a.text && /התאמה|סיכום|פגיש/.test(a.text) && !/רשימת תפוצה/.test(a.text));
     compassSummary = summary?.text || null;
   }
 

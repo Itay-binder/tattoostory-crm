@@ -7,8 +7,8 @@ import { sendMail, MAIL_FROM } from "@/lib/mailer";
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
-const BASE_URL = "https://powercouple-finance.vercel.app";
-const TEAM_CC = ["blog@powercouple.co.il"];
+const BASE_URL = process.env.BASE_URL || "https://tattoostory-crm.vercel.app";
+const TEAM_CC = ["liorrubin3@gmail.com", "itay@binder.co.il"];
 
 interface SignerLite { name: string; role: string; token: string; status: string; client_id: string | null; contact: string | null }
 interface EnvLite { id: string; template_name: string; created_at: string; status: string; contract_signers: SignerLite[] }
@@ -22,7 +22,7 @@ function reminderHtml(name: string, templateName: string, link: string): string 
     <a href="${link}" style="background:#b3261e;color:#fff;padding:12px 26px;border-radius:8px;text-decoration:none;font-size:16px">חתימה על ההסכם</a>
   </p>
   <p dir="rtl" style="text-align:right;font-size:14px;color:#666">אם כבר חתמת, אפשר להתעלם מהודעה זו.</p>
-  <p dir="rtl" style="text-align:right;font-size:15px">אוהבים,<br>דין ומיק</p>
+  <p dir="rtl" style="text-align:right;font-size:15px">Tattoo Story Academy</p>
 </div>`;
 }
 

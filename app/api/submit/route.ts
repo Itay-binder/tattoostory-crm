@@ -54,7 +54,7 @@ function buildSummaryHtml(answers: Answers, files: UploadedFile[], email: string
   return `<!DOCTYPE html><html dir="rtl" lang="he"><head><meta charset="utf-8"><title>שאלון פיננסי</title></head>
 <body dir="rtl" style="font-family:Arial,sans-serif;direction:rtl;text-align:right;max-width:800px;margin:0 auto">
 <h1 style="color:#1a1a2e;border-bottom:3px solid #b3261e;padding-bottom:8px">שאלון פיננסי — ${esc(answers.fullName || "")}</h1>
-<p style="color:#666">פאוור קאפל — דין ומיק | הוגש: ${esc(submittedAt)} | מייל: ${esc(email)}</p>
+<p style="color:#666">Tattoo Story Academy | הוגש: ${esc(submittedAt)} | מייל: ${esc(email)}</p>
 ${rows}
 <h2 style="color:#b3261e;margin:24px 0 8px">מסמכים שצורפו</h2>
 <table style="border-collapse:collapse;width:100%">${fileRows || "<tr><td style='padding:6px 10px'>—</td></tr>"}</table>

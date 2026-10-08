@@ -24,9 +24,9 @@ function browserSource(req: Request): string {
 function originAllowed(src: string): boolean {
   try {
     const host = new URL(src).hostname.toLowerCase();
-    return host === "powercouple.co.il" || host.endsWith(".powercouple.co.il") || host === "vercel.app" || host.endsWith(".vercel.app");
+    return host === "tattoostoryacademy.com" || host.endsWith(".tattoostoryacademy.com") || host === "vercel.app" || host.endsWith(".vercel.app");
   } catch {
-    return /(^|\/\/|\.)(powercouple\.co\.il|vercel\.app)([/:]|$)/i.test(src);
+    return /(^|\/\/|\.)(tattoostoryacademy\.com|vercel\.app)([/:]|$)/i.test(src);
   }
 }
 
@@ -73,7 +73,7 @@ export async function POST(req: Request) {
   const src = browserSource(req);
   const isBrowser = !!src; // בקשת דפדפן (VSL-V1) מול שרת-לשרת (PHP snippet/Make)
 
-  // 1) בקשת דפדפן חייבת להגיע מ-powercouple.co.il — חוסם הזרקה מאתר זר
+  // 1) בקשת דפדפן חייבת להגיע מ-tattoostoryacademy.com — חוסם הזרקה מאתר זר
   if (isBrowser && !originAllowed(src)) {
     return NextResponse.json({ error: "forbidden origin" }, { status: 403, headers: CORS });
   }

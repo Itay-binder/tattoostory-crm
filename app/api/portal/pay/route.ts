@@ -9,7 +9,7 @@ export const runtime = "nodejs";
 const PORTAL_ALLOWED = ["itay.bin111@gmail.com"];
 // ⚠️ בדיקות (09/2026): הסכומים הורדו ל-1₪ לצורך טסטים. לשחזר ל-500 / 1000 לפני עלייה אמיתית.
 const STEPS: Record<string, { amount: number; product: string }> = {
-  compass: { amount: 1, product: "פגישת מצפן — תכנית אישית עם יועץ נדל\"ן (בדיקה)" },
+  compass: { amount: 1, product: "פגישת התאמה — Tattoo Story Academy (בדיקה)" },
   process: { amount: 1, product: "התקדמות לתהליך — שאלון פיננסי + הסכם התקשרות (בדיקה)" },
 };
 

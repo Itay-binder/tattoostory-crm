@@ -61,14 +61,14 @@ export const FIELD_TYPE_LABELS: Record<FieldType, string> = {
   signature: "חתימה",
 };
 
-// מפתחות נתוני לקוח הזמינים ל-auto-fill (מתוך השאלון הפיננסי)
+// מפתחות נתוני לקוח הזמינים ל-auto-fill (מתוך שאלון המועמדות)
 export const CLIENT_DATA_KEYS: { key: string; label: string }[] = [
   { key: "fullName", label: "שם מלא" },
   { key: "idNumber", label: "תעודת זהות" },
   { key: "phone", label: "טלפון" },
   { key: "birthDate", label: "תאריך לידה" },
-  { key: "maritalStatus", label: "מצב משפחתי" },
   { key: "city", label: "עיר" },
+  { key: "instagram", label: "אינסטגרם" },
   { key: "address", label: "כתובת מלאה" },
 ];
 

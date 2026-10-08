@@ -1,0 +1,107 @@
+# tattoostory-crm — ה-CRM של Tattoo Story Academy (ליאור רובין)
+
+## מה זה
+
+CRM מלא לניהול לידים, מועמדות ולקוחות של האקדמיה להכשרת מקעקעים של ליאור רובין.
+הפרויקט הוא **פורט אחד-לאחד של ה-CRM של פאוור קאפל** (`finance-form`) — אותן טבלאות,
+אותם מסכים, אותם פיצ'רים — עם התוכן, המיתוג והקונפיגורציה של ליאור.
+
+## קישורים
+
+- **פרודקשן:** https://tattoostory-crm.vercel.app
+- **ריפו:** https://github.com/Itay-binder/tattoostory-crm
+- **Vercel:** team `liftygo` (`team_E7HXhz1GLkBowkDqgelE4xaB`), project `prj_kef6DcHHvecvkuGgTddVF9L840oM`
+- **Supabase:** project `crsozdimrplcmngmzkcl` (חשבון liorrubin3@gmail.com), אזור eu-central-1
+- **מקור הפורט:** `C:\Users\itay\עסק איתי\PowerCouple - דין ומיק\finance-form`
+- **פריסה:** `git push` → Vercel auto-deploy
+
+## Stack
+
+Next.js 15 (App Router) · TypeScript · Supabase (Postgres + Auth + Storage) · Vercel
+
+- **אימות:** Supabase Google OAuth. `lib/authClient.ts` עוטף את ה-API בשמות של Firebase
+  כדי שהדפים לא ישתנו — **אין Firebase בפרויקט הזה**. גם `lib/firebaseAdmin.ts` הוא
+  שם היסטורי בלבד; `verifyRequest()` מאמת טוקן Supabase.
+- **הרשאות אדמין:** `lib/admin.ts` → `ADMIN_EMAILS` (itay@binder.co.il, liorrubin3@gmail.com).
+  להוספת נציגה: להוסיף את המייל גם ל-`ADMIN_EMAILS` וגם ל-`REPS` ב-`lib/reps.ts`.
+- **אחסון:** דלי Supabase פרטי בשם `files` (`lib/storage.ts`). prefixes: `finance-form/`,
+  `contract-templates/`, `contract-signatures/`, `contract-signed/`.
+- **פונט:** IBM Plex Sans Hebrew · **ערכה:** בהירה כברירת מחדל (sage/קרם), כהה דרך ה-toggle.
+
+## מסכים
+
+```
+דשבורד | לידים | פגישות התאמה | לקוחות | מימון | עסקאות | מאניצ'אט | ווצאפ | הגדרות
+```
+
+- `/admin` — **לקוחות** (מי שנסגרה). `/admin/[uid]` — כרטיס לקוחה.
+- `/admin/leads` + `/admin/leads/[id]` — לידים וכרטיס ליד (יומן פעילות, שיוך נציגה, קביעת פגישה, ווצאפ).
+- `/admin/compass` — צינור **פגישות התאמה**. ליד נכנס לכאן אוטומטית ברגע שנסגר (WON).
+- `/admin/dashboard` — משפך, פילוחים לפי פלטפורמה / דף נחיתה / מודעה, נתוני מטא, עוזר נתונים (DataChat).
+- `/admin/whatsapp` — אינבוקס GreenAPI (תוספת של ליאור, לא קיים ב-finance-form).
+- `/admin/templates` — תבניות חוזה + שליחה לחתימה. `/sign/[token]` — דף החתימה הציבורי.
+- `/` — שאלון המועמדות הציבורי. `/portal` — פורטל הלקוחה (מסע 9 שלבים).
+- `/admin/financing`, `/admin/deals` — נשארו מהשלד (עולם הנדל"ן של פאוור קאפל). לא בשימוש אצל ליאור.
+
+## מודל הנתונים — מה חשוב לדעת
+
+- **`lib/leads.ts`** הוא מקור האמת למשפך. **המפתחות של `LEAD_STAGES` זהים לפאוור קאפל,
+  רק התוויות בשפה של ליאור** — כך כל הקוד, הפונקציות ב-SQL והדשבורד ממשיכים לעבוד:
+  `new`=ליד חדש · `contacted`=שיחה 1 יצאה · `no_answer_1/2/3`=שתיים/שלוש/4 שיחות יצאו ·
+  `followup`=פולואפ עתידי · `watching`=נשלחה הודעה · `relevant`=מתעניינת ·
+  `meeting_scheduled`=נקבעה שיחה · `compass`=הגיעה לפגישת התאמה · `in_process`=בטיפול ·
+  `won`=נסגר (לקוחה) · `lost`=לא רלוונטי · `dormant`=ליד רדום.
+  אותו עקרון ב-`CLIENT_STAGES` (`lib/clients.ts`) וב-`JOURNEY_STAGES` (`lib/journey.ts`).
+- **`leads.quali`** — שדות שאלון המועמדות (`QUALI_FIELDS`): source, gender, age, whyTattoo,
+  goals, seriousness, willDoTasks, successVision, understandsTime, needsPractice,
+  notQuickMoney, sessionRecordings, openDay.
+- **`leads.custom`** — UTM + `landingpage` + `legacy_status` + `last_call`. הדשבורד מפלח לפי
+  `custom->>'utm_source'`, `custom->>'landingpage'`, `custom->>'utm_content'`.
+- **`lead_activity`** — יומן לכל ליד (intake / note / stage / system).
+
+## הדאטה ההיסטורית
+
+445 הלידים מהגיליון של ליאור הומרו לסכמה הזאת (08/10/2026):
+
+- הטבלאות של הסכמה הראשונה נשמרו ב-**סכמה `legacy`** בתוך אותו Postgres
+  (`legacy.contacts`, `legacy.leads`, `legacy.questionnaires`, `legacy.notes` ועוד) — שום נתון לא נמחק.
+- גיבוי JSON מקומי: `_legacy-backup/` (לא נכנס לגיט).
+- עמודת הסטטוס בגיליון הייתה **טקסט חופשי**, לא סטטוס. היא סווגה לשלבים בעזרת
+  `mapStage()` ב-`scripts/_migrate-legacy-leads.mjs`, והטקסט המקורי נשמר גם ב-
+  `custom.legacy_status` וגם כהערה ביומן — אפשר לעשות טריאז' מחדש בכל רגע.
+- הערות המתאמות (`notes_rep1` / `notes_rep2`) נכנסו ליומן הפעילות עם `by_actor` = ליהי / שיר.
+
+## מיגרציות
+
+```bash
+node scripts/apply-migrations.mjs   # מריץ לפי סדר שם הקובץ, מתעד ב-_migrations
+```
+
+הסקריפט קורא `SUPABASE_DB_URL` מ-`.env.local`, רץ בטרנזקציה לכל קובץ, ועוצר בשגיאה הראשונה.
+סקריפטים בתחילית `_` הם חד-פעמיים ומחוץ לגיט.
+
+## Env
+
+מוגדר ועובד: `SUPABASE_*`, `GREENAPI_INSTANCE/TOKEN` (instance 7105326802), `BASE_URL`,
+`MAIL_FROM`, `NOTIFY_EMAIL`, `MEETINGS_CALENDAR_USER`, `META_AD_ACCOUNT`
+(`act_1026356652124107`), `META_BUSINESS_ID` (`532639584829569`), `CRON_SECRET`,
+`META_WEBHOOK_VERIFY_TOKEN`.
+
+**חסר — דורש חשבון של ליאור:**
+
+| Env | מה זה מפעיל |
+|---|---|
+| `META_ACCESS_TOKEN`, `META_SYSTEM_TOKEN` | נתוני מטא בדשבורד + סקשן מאניצ'אט |
+| `GOOGLE_SA_B64`, `GOOGLE_IMPERSONATE_USER`, `DRIVE_PARENT_FOLDER_ID` | Google Drive (תיקיית לקוחה), יומן גוגל (קביעת פגישות), שליחת מייל |
+| `CARDCOM_TERMINAL`, `CARDCOM_API_NAME`, `CARDCOM_API_PASSWORD` | סליקה בפורטל |
+
+⚠️ **Google:** ליאור על Gmail רגיל, לא Workspace. domain-wide delegation לא יעבוד שם —
+צריך או Workspace, או לעבור ל-OAuth אישי, או להשתמש ביומן/דרייב של איתי.
+
+## גוצ'ות
+
+- `vercel.json` מגדיר 4 crons. כל ראוט cron דורש `Bearer CRON_SECRET`.
+- קליטת לידים (`/api/leads/intake`) חוסמת בקשות דפדפן שלא מ-`tattoostoryacademy.com`
+  (או `*.vercel.app`). בקשות שרת-לשרת (Make/PHP) עוברות עם מפתח ה-API מטבלת `settings`.
+- `.github/workflows/regev-meeting-reminders.yml` הוא שארית מפאוור קאפל. בלי secrets הוא נכשל — למחוק או להשתיק.
+- `app/hagrala/` ו-`app/api/webinar/rav-subscribe` הם דפים של פאוור קאפל שנשארו בפורט. לא בשימוש.

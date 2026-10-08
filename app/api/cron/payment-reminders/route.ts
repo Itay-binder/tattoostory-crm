@@ -7,7 +7,7 @@ import { sendMail, MAIL_FROM } from "@/lib/mailer";
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
-const TEAM_CC = ["blog@powercouple.co.il"];
+const TEAM_CC = ["liorrubin3@gmail.com", "itay@binder.co.il"];
 
 /** תאריך היום בישראל בפורמט YYYY-MM-DD (לא UTC — אחרת נטעה ביום). */
 function israelDate(offsetDays = 0): string {
@@ -40,7 +40,7 @@ function emailHtml(p: { title: string; amount: number | null; due_date: string; 
   </table>
   ${p.note ? `<p dir="rtl" style="text-align:right;font-size:15px">${p.note}</p>` : ""}
   <p dir="rtl" style="text-align:right;font-size:15px">לכל שאלה אנחנו כאן.</p>
-  <p dir="rtl" style="text-align:right;font-size:15px">אוהבים,<br>דין ומיק</p>
+  <p dir="rtl" style="text-align:right;font-size:15px">Tattoo Story Academy</p>
 </div>`;
 }
 

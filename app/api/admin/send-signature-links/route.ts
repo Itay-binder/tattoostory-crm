@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { supa } from "@/lib/supabaseAdmin";
 import { verifyAdmin } from "@/lib/admin";
-import { sendPowerCoupleWhatsapp, WA_CONTACTS, normalizeIsraeliPhone } from "@/lib/notify";
+import { sendBusinessWhatsapp, WA_CONTACTS, normalizeIsraeliPhone } from "@/lib/notify";
 
 export const runtime = "nodejs";
 
@@ -14,7 +14,7 @@ export async function POST(req: Request) {
 
   const body = await req.json().catch(() => ({}));
   const envelopeId: string = body.envelopeId || "";
-  const targets: string[] = Array.isArray(body.targets) ? body.targets : []; // mik | dean | hamal | client
+  const targets: string[] = Array.isArray(body.targets) ? body.targets : []; // itay | client
   const others: string[] = Array.isArray(body.others) ? body.others.filter((x: string) => x && x.trim()) : [];
   const origin = (body.origin && String(body.origin)) || new URL(req.url).origin;
 
@@ -37,12 +37,12 @@ export async function POST(req: Request) {
 
   const results: { to: string; label: string; ok: boolean; error?: string }[] = [];
   const send = async (to: string, label: string, text: string) => {
-    try { await sendPowerCoupleWhatsapp({ to, text }); results.push({ to, label, ok: true }); }
+    try { await sendBusinessWhatsapp({ to, text }); results.push({ to, label, ok: true }); }
     catch (e) { results.push({ to, label, ok: false, error: (e as Error).message }); }
   };
 
   // נמענים קבועים — מקבלים את כל הקישורים
-  for (const key of ["mik", "dean", "hamal"] as const) {
+  for (const key of ["itay"] as const) {
     if (targets.includes(key)) await send(WA_CONTACTS[key].chatId, WA_CONTACTS[key].label, allLinksText);
   }
   // אחר / אחר נוסף

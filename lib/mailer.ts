@@ -1,12 +1,12 @@
 import { GoogleAuth } from "google-auth-library";
 import { env } from "@/lib/env";
 
-// שליחת מייל מהכתובת הראשית של העסק (blog@powercouple.co.il),
+// שליחת מייל מהכתובת הראשית של העסק (MAIL_FROM),
 // דרך אותו service account עם הרשאות דומיין ששולח את הזמנות היומן.
 // דרוש scope: https://www.googleapis.com/auth/gmail.send ב-DWD.
 
 const SCOPES = ["https://www.googleapis.com/auth/gmail.send"];
-export const MAIL_FROM = "blog@powercouple.co.il";
+export const MAIL_FROM = process.env.MAIL_FROM || "liorrubin3@gmail.com";
 
 function sa(): Record<string, unknown> | null {
   const b64 = env("GOOGLE_SA_B64");
@@ -39,7 +39,7 @@ export async function sendMail(input: MailInput): Promise<boolean> {
   const { token } = await client.getAccessToken();
   if (!token) return false;
 
-  const from = `${encodeHeader(input.fromName || "פאוור קאפל")} <${MAIL_FROM}>`;
+  const from = `${encodeHeader(input.fromName || "Tattoo Story Academy")} <${MAIL_FROM}>`;
   const cc = (input.cc || []).filter(Boolean);
   const headers = [
     `From: ${from}`,

@@ -13,11 +13,11 @@ function applyTheme(t: Theme) {
 
 /** מחליף בין ערכה כהה לבהירה. ההעדפה נשמרת ברמת החשבון (ולכן עוברת בין מכשירים). */
 export default function ThemeToggle() {
-  const [theme, setTheme] = useState<Theme>("dark");
+  const [theme, setTheme] = useState<Theme>("light");
 
   // מצב ראשוני מהדפדפן (מיידי) ואז סנכרון מהשרת (ההעדפה של החשבון)
   useEffect(() => {
-    const local = (localStorage.getItem("pcfTheme") as Theme) || "dark";
+    const local = (localStorage.getItem("pcfTheme") as Theme) || "light";
     setTheme(local);
     applyTheme(local);
 
@@ -27,7 +27,7 @@ export default function ThemeToggle() {
         const t = await u.getIdToken();
         const res = await fetch("/api/admin/prefs", { headers: { Authorization: `Bearer ${t}` } });
         if (!res.ok) return;
-        const server = ((await res.json()).theme as Theme) || "dark";
+        const server = ((await res.json()).theme as Theme) || "light";
         if (server !== local) {
           setTheme(server);
           applyTheme(server);

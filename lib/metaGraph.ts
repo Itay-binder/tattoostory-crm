@@ -1,16 +1,16 @@
 // מודול מטא (Graph API) לסקשן מאניצ'אט — WABA + IG/FB.
-// הטוקן (System User של פאוור קאפל) ב-env: PC_META_SYSTEM_TOKEN. עסק: PC_META_BUSINESS_ID.
+// הטוקן (System User של Tattoo Story) ב-env: META_SYSTEM_TOKEN. עסק: META_BUSINESS_ID.
 import { supa } from "@/lib/supabaseAdmin";
 
 const GRAPH = "https://graph.facebook.com/v21.0";
 
 function token(): string {
-  const t = process.env.PC_META_SYSTEM_TOKEN || "";
-  if (!t) throw new Error("חסר PC_META_SYSTEM_TOKEN (טוקן מטא)");
+  const t = process.env.META_SYSTEM_TOKEN || "";
+  if (!t) throw new Error("חסר META_SYSTEM_TOKEN (טוקן מטא)");
   return t;
 }
 function businessId(): string {
-  return process.env.PC_META_BUSINESS_ID || "228809944490505";
+  return process.env.META_BUSINESS_ID || "532639584829569";
 }
 
 async function graph<T>(path: string, params: Record<string, string> = {}): Promise<T> {

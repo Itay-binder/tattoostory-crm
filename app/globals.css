@@ -1,12 +1,42 @@
-/* === Tattoo Story Academy CRM — Design System === */
+/* === Tattoo Story Academy CRM — שפת עיצוב (מבוססת שלד finance-form) === */
 *,
 *::before,
 *::after {
   box-sizing: border-box;
 }
 
-/* === ערכה בהירה (ברירת מחדל) === */
+/* === ערכת כהה (ברירת מחדל) === */
 :root {
+  --bg: #081B1D;
+  --bg-2: #0e2326;
+  --card: #132c30;
+  --line: rgba(110, 132, 120, 0.18);
+  --text: #f0ede6;
+  --muted: #9ab4ac;
+  --accent: #6e8478;
+  --accent-2: #8fa89f;
+  --gold: #EBD378;
+  --amber: #8B4708;
+  --green: #25d366;
+
+  /* משטחים ומצבים — מוגדרים כמשתנים כדי שהערכה הבהירה תחליף אותם */
+  --surface: #0b2225;          /* שדות קלט, פאנלים פנימיים */
+  --surface-2: #1a3538;        /* צ'יפים, כפתורי אייקון */
+  --card-a: #152f32;           /* גרדיאנט הכרטיס — עליון */
+  --card-b: #0e2326;           /* גרדיאנט הכרטיס — תחתון */
+  --line-soft: rgba(110, 132, 120, 0.07);
+  --line-strong: rgba(110, 132, 120, 0.3);
+  --hover: rgba(110, 132, 120, 0.06);
+  --hover-2: rgba(110, 132, 120, 0.1);
+  --hover-soft: rgba(110, 132, 120, 0.04);
+  --spin-track: rgba(110, 132, 120, 0.3);
+  --spin-head: #f0ede6;
+  --shadow: rgba(0, 0, 0, 0.55);
+  --glow: rgba(110, 132, 120, 0.15); /* זוהר עדין ברקע הדף */
+}
+
+/* === ערכה בהירה (קרם/sage — המיתוג של Tattoo Story) === */
+:root[data-theme="light"] {
   --bg: #f8f5ef;
   --bg-2: #f0ece3;
   --card: #ffffff;
@@ -32,35 +62,6 @@
   --spin-head: var(--accent);
   --shadow: rgba(8, 27, 29, 0.1);
   --glow: rgba(110, 132, 120, 0.06);
-}
-
-/* === ערכת כהה — רק אם המשתמש בחר === */
-:root[data-theme="dark"] {
-  --bg: #081B1D;
-  --bg-2: #0e2326;
-  --card: #132c30;
-  --line: rgba(110, 132, 120, 0.18);
-  --text: #f0ede6;
-  --muted: #9ab4ac;
-  --accent: #6e8478;
-  --accent-2: #8fa89f;
-  --gold: #EBD378;
-  --amber: #8B4708;
-  --green: #25d366;
-
-  --surface: #0b2225;
-  --surface-2: #1a3538;
-  --card-a: #152f32;
-  --card-b: #0e2326;
-  --line-soft: rgba(110, 132, 120, 0.07);
-  --line-strong: rgba(110, 132, 120, 0.3);
-  --hover: rgba(110, 132, 120, 0.06);
-  --hover-2: rgba(110, 132, 120, 0.1);
-  --hover-soft: rgba(110, 132, 120, 0.04);
-  --spin-track: rgba(110, 132, 120, 0.3);
-  --spin-head: #f0ede6;
-  --shadow: rgba(0, 0, 0, 0.55);
-  --glow: rgba(110, 132, 120, 0.15);
 }
 
 html,
@@ -100,7 +101,7 @@ body {
   gap: 8px;
   background: linear-gradient(90deg, #6e8478, #8B4708);
   color: #fff;
-  font-weight: 700;
+  font-weight: 800;
   font-size: 14px;
   letter-spacing: 0.5px;
   padding: 6px 14px;
@@ -130,12 +131,12 @@ body {
 
 /* === CARD === */
 .pcf-card {
-  background: var(--card);
+  background: linear-gradient(180deg, var(--card-a) 0%, var(--card-b) 100%);
   border: 1px solid var(--line);
   border-radius: 20px;
   padding: 26px 22px;
   margin: 22px auto 0;
-  box-shadow: 0 2px 8px var(--shadow);
+  box-shadow: 0 16px 40px var(--shadow);
 }
 
 .pcf-card h2 {
@@ -282,17 +283,17 @@ body {
   align-items: center;
   justify-content: center;
   gap: 10px;
-  background: linear-gradient(135deg, #6e8478, #5a6e65);
+  background: linear-gradient(90deg, #6e8478, #EBD378);
   color: #fff;
-  font-weight: 700;
+  font-weight: 900;
   font-size: 17px;
   font-family: inherit;
   padding: 14px 26px;
   border: 0;
-  border-radius: 10px;
+  border-radius: 14px;
   cursor: pointer;
   text-decoration: none;
-  box-shadow: 0 10px 28px rgba(110, 132, 120, 0.35);
+  box-shadow: 0 14px 36px rgba(110, 132, 120, 0.35);
   transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
 }
 
@@ -499,8 +500,8 @@ body {
 .pcf-err {
   color: #ff8585;
   font-size: 14px;
-  background: rgba(248, 113, 113, 0.08);
-  border: 1px solid rgba(248, 113, 113, 0.25);
+  background: rgba(110, 132, 120, 0.08);
+  border: 1px solid rgba(110, 132, 120, 0.25);
   border-radius: 12px;
   padding: 12px 16px;
   margin-top: 16px;
@@ -524,15 +525,17 @@ body {
 /* === TOP NAV (Clients / Leads / Dashboard / Settings) === */
 .pcf-topnav {
   display: flex;
-  align-items: center;
   gap: 6px;
   flex-wrap: wrap;
-  background: var(--surface-2);
+  align-items: center;
+  background: var(--bg-2);
   border: 1px solid var(--line);
   border-radius: 14px;
   padding: 6px;
   margin-bottom: 20px;
 }
+
+/* לוגו Tattoo Story בתוך סרגל הניווט */
 .pcf-topnav-logo {
   display: flex;
   align-items: center;
@@ -540,6 +543,14 @@ body {
   margin-left: 6px;
   border-left: 1px solid var(--line);
 }
+
+.pcf-topnav-logo img {
+  height: 30px;
+  object-fit: contain;
+  /* הלוגו שחור במקור — בערכה הכהה הופכים אותו ללבן */
+  filter: brightness(0) invert(1);
+}
+:root[data-theme="light"] .pcf-topnav-logo img { filter: none; }
 /* כפתור בתפריט (מחליף הערכה) — מאפס את ברירת המחדל של הדפדפן כדי שייראה כמו שאר הפריטים */
 button.pcf-topnav-item {
   background: transparent;
@@ -565,8 +576,8 @@ button.pcf-topnav-item {
   background: var(--hover);
 }
 .pcf-topnav-item.active {
-  background: var(--accent);
   color: #fff;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
 }
 
 .pcf-icon-btn {
@@ -732,8 +743,7 @@ button.pcf-topnav-item {
 .pcf-table thead th {
   text-align: right;
   padding: 12px 16px;
-  background: var(--surface-2);
-  color: var(--text);
+  color: var(--muted);
   font-weight: 700;
   font-size: 13px;
   border-bottom: 1px solid var(--line);
@@ -750,8 +760,8 @@ button.pcf-topnav-item {
   transition: background 0.12s;
 }
 
-.pcf-table tbody tr:hover td {
-  background: rgba(110,132,120,0.06);
+.pcf-table tbody tr:hover {
+  background: var(--hover-soft);
 }
 
 .pcf-table.answers tbody tr {
@@ -791,8 +801,8 @@ button.pcf-topnav-item {
 }
 
 .pcf-pill-status.danger {
-  background: rgba(248, 113, 113, 0.15);
-  color: #f87171;
+  background: rgba(255, 80, 80, 0.15);
+  color: #ff6b6b;
 }
 
 /* === CONTRACT EDITOR === */
@@ -941,9 +951,8 @@ button.pcf-topnav-item {
   }
 }
 
-/* בורר התאריך לא הפוך בערכה הבהירה (ברירת מחדל) */
-:root { --picker-filter: none; }
-:root[data-theme="dark"] { --picker-filter: invert(0.8); }
+/* בורר התאריך לא הפוך בערכה הבהירה */
+:root[data-theme="light"] { --picker-filter: none; }
 
 /* לוחות האדמין — רחבים בדסקטופ (הטבלאות צריכות מקום) */
 @media (min-width: 1100px) {

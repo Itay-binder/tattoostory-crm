@@ -8,11 +8,12 @@ export interface Rep {
 }
 
 export const REPS: Rep[] = [
-  { email: "assaf@powercouple.co.il", name: "אסף אליאסי", initials: "אא", color: "#3b82f6" },
-  { email: "regev@powercouple.co.il", name: "רגב", initials: "רפ", color: "#22c55e" },
-  { email: "itay@binder.co.il", name: "איתי בינדר", initials: "אב", color: "#f59e0b" },
-  { email: "blog@powercouple.co.il", name: "בלוג פאוור", initials: "בפ", color: "#a855f7" },
-  { email: "katia@powercouple.co.il", name: "קטרינה", initials: "קס", color: "#14b8a6" },
+  { email: "liorrubin3@gmail.com", name: "ליאור רובין", initials: "לר", color: "#6e8478" },
+  { email: "itay@binder.co.il", name: "איתי בינדר", initials: "אב", color: "#8B4708" },
+  // מתאמות הפגישות — להוסיף כאן את המייל שלהן כשייפתח להן חשבון
+  // (צריך להוסיף את אותו מייל גם ל-ADMIN_EMAILS ב-lib/admin.ts):
+  // { email: "", name: "ליהי", initials: "לי", color: "#3b82f6" },
+  // { email: "", name: "שיר", initials: "שי", color: "#a855f7" },
 ];
 
 export function repByEmail(email?: string | null): Rep | null {

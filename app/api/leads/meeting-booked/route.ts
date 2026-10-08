@@ -30,9 +30,9 @@ function browserSource(req: Request): string {
 function originAllowed(src: string): boolean {
   try {
     const host = new URL(src).hostname.toLowerCase();
-    return host === "powercouple.co.il" || host.endsWith(".powercouple.co.il") || host === "vercel.app" || host.endsWith(".vercel.app");
+    return host === "tattoostoryacademy.com" || host.endsWith(".tattoostoryacademy.com") || host === "vercel.app" || host.endsWith(".vercel.app");
   } catch {
-    return /(^|\/\/|\.)(powercouple\.co\.il|vercel\.app)([/:]|$)/i.test(src);
+    return /(^|\/\/|\.)(tattoostoryacademy\.com|vercel\.app)([/:]|$)/i.test(src);
   }
 }
 
@@ -104,7 +104,7 @@ export async function POST(req: Request) {
   );
 
   const when = meetingStart ? formatMeeting(meetingStart) : "";
-  const title = meetingTitle || "פגישת תכנית נדל\"ן";
+  const title = meetingTitle || "פגישת התאמה";
 
   // תיעוד ביומן הפעילות של הליד — מתי הפגישה שתואמה
   await addLeadActivity(lead.id, {

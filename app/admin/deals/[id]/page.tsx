@@ -476,7 +476,7 @@ export default function DealDetail({ params }: { params: Promise<{ id: string }>
           !payOpen && <p style={{ color: "var(--muted)", fontSize: 14, marginBottom: 0 }}>אין תשלומים בלוח. לחצו "צור תשלום" כדי להוסיף תזכורת.</p>
         )}
         <p style={{ color: "var(--muted)", fontSize: 12, marginTop: 12, marginBottom: 0 }}>
-          התזכורות נשלחות אוטומטית במייל מ-blog@powercouple.co.il ללקוחות המשויכים, עם עותק אליכם.
+          התזכורות נשלחות אוטומטית במייל מכתובת המערכת ללקוחות המשויכים, עם עותק אליכם.
         </p>
       </div>
 

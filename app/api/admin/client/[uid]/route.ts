@@ -3,7 +3,7 @@ import { supa } from "@/lib/supabaseAdmin";
 import { verifyAdmin } from "@/lib/admin";
 import { uploadFile } from "@/lib/googleDrive";
 import { FILE_CATEGORIES } from "@/lib/formSchema";
-import { buildClientWhatsappMessage, sendPowerCoupleWhatsapp } from "@/lib/notify";
+import { buildClientWhatsappMessage, sendBusinessWhatsapp } from "@/lib/notify";
 import { findLeadForClient } from "@/lib/leadsRepo";
 import { stageLabel } from "@/lib/leads";
 import { CLIENT_STAGES, CLIENT_PACES, clientStageLabel } from "@/lib/clients";
@@ -219,7 +219,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ uid: st
     if (!c) return NextResponse.json({ error: "הלקוח לא נמצא" }, { status: 404 });
     const origin = new URL(req.url).origin;
     const text = buildClientWhatsappMessage({ answers: c.answers || {}, email: c.email || "", status: c.status || "draft", clientUrl: `${origin}/admin/${uid}` });
-    try { const { idMessage } = await sendPowerCoupleWhatsapp({ to: body.to, text }); return NextResponse.json({ ok: true, idMessage }); }
+    try { const { idMessage } = await sendBusinessWhatsapp({ to: body.to, text }); return NextResponse.json({ ok: true, idMessage }); }
     catch (e) { return NextResponse.json({ error: (e as Error).message }, { status: 502 }); }
   }
 

@@ -52,7 +52,7 @@ export interface DealField {
   options?: string[];
 }
 
-// שדות העסקה — מותאם לעסקאות נדל"ן של פאוור קאפל
+// שדות העסקה — נשמר מהשלד המקורי (עסקאות נדל"ן). לא בשימוש אצל Tattoo Story.
 export const DEAL_FIELDS: DealField[] = [
   { key: "address", label: "כתובת הנכס", type: "text" },
   { key: "city", label: "עיר", type: "text" },

@@ -402,7 +402,7 @@ export default function Page() {
     return (
       <main className="pcf-wrap">
         <header className="pcf-hero">
-          <span className="pcf-badge">פאוור קאפל • דין ומיק</span>
+          <span className="pcf-badge">Tattoo Story Academy</span>
           <h1>
             <u>שאלון פיננסי</u> — נעים להכיר 👋
           </h1>
@@ -438,7 +438,7 @@ export default function Page() {
           </button>
           {errorMsg && <div className="pcf-err">{errorMsg}</div>}
         </div>
-        <div className="pcf-foot">דין ומיק • פאוור קאפל © 2026</div>
+        <div className="pcf-foot">Tattoo Story Academy © 2026</div>
       </main>
     );
   }
@@ -448,7 +448,7 @@ export default function Page() {
     return (
       <main className="pcf-wrap">
         <header className="pcf-hero">
-          <span className="pcf-badge">פאוור קאפל • דין ומיק</span>
+          <span className="pcf-badge">Tattoo Story Academy</span>
         </header>
         <div className="pcf-card pcf-success">
           <div className="check">✓</div>
@@ -467,7 +467,7 @@ export default function Page() {
             <a className="pcf-btn" style={{ marginRight: 10 }} href="/portal">← חזרה למסע שלי</a>
           </div>
         </div>
-        <div className="pcf-foot">דין ומיק • פאוור קאפל © 2026</div>
+        <div className="pcf-foot">Tattoo Story Academy © 2026</div>
       </main>
     );
   }
@@ -488,7 +488,7 @@ export default function Page() {
   return (
     <main className="pcf-wrap">
       <header className="pcf-hero">
-        <span className="pcf-badge">פאוור קאפל • דין ומיק</span>
+        <span className="pcf-badge">Tattoo Story Academy</span>
         <h1>
           <u>שאלון פיננסי</u>
         </h1>
@@ -651,7 +651,7 @@ export default function Page() {
         </div>
       </div>
 
-      <div className="pcf-foot">דין ומיק • פאוור קאפל © 2026</div>
+      <div className="pcf-foot">Tattoo Story Academy © 2026</div>
     </main>
   );
 }

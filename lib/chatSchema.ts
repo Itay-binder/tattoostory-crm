@@ -2,7 +2,7 @@
 // מתעדכן ידנית כשמוסיפים טבלאות/עמודות משמעותיות.
 
 export const DB_SCHEMA = `
-מסד נתונים: Postgres (Supabase) של ה-CRM של פאוור קאפל.
+מסד נתונים: Postgres (Supabase) של ה-CRM של Tattoo Story Academy.
 כל התאריכים ב-UTC (timestamptz). אזור הזמן העסקי הוא Asia/Jerusalem —
 בשאילתות על תאריכים השתמש ב-(col AT TIME ZONE 'Asia/Jerusalem').
 
@@ -10,18 +10,20 @@ TABLE leads  -- לידים (3,000+)
   id uuid, first_name text, last_name text, full_name text,
   email text, phone text (מנורמל: 972XXXXXXXXX),
   id_number text,
-  stage text  -- new=ליד חדש, contacted=יצאה שיחה, followup=פולואפ, watching=במעקב,
-              -- relevant=ליד רלוונטי, compass=הגיע לפגישת מצפן, progressed=התקדם לתהליך,
-              -- in_process=בתהליך, done=סיים תהליך, won=סגר (הפך ללקוח), lost=לא רלוונטי,
-              -- dormant=ליד רדום
-  assigned_to text  -- מייל הנציג המשויך (assaf@/regev@/itay@binder.co.il/blog@)
-  quali jsonb   -- שדות הסמכה מהשאלון. מפתחות: source (מקור הגעה), familiarity,
-                -- knownDuration, age, gender, maritalStatus, liquidSavings,
-                -- investmentGoal, propertyOwnership, employed, monthlySavings
+  stage text  -- new=ליד חדש, contacted=שיחה 1 יצאה, no_answer_1=שתי שיחות יצאו,
+              -- no_answer_2=שלוש שיחות יצאו, no_answer_3=4 שיחות יצאו,
+              -- followup=פולואפ עתידי, watching=נשלחה הודעה, relevant=מתעניינת,
+              -- meeting_scheduled=נקבעה שיחה, compass=הגיעה לפגישת התאמה,
+              -- progressed=התקדמה לתהליך, in_process=בטיפול, done=סיימה הכשרה,
+              -- won=נסגר (לקוחה), lost=לא רלוונטי, dormant=ליד רדום
+  assigned_to text  -- מייל הנציג המשויך (liorrubin3@gmail.com / itay@binder.co.il)
+  quali jsonb   -- שדות הסמכה משאלון המועמדות. מפתחות: source (מקור הגעה), gender, age,
+                -- whyTattoo, goals, seriousness, willDoTasks, successVision,
+                -- understandsTime, needsPractice, notQuickMoney, sessionRecordings, openDay
   custom jsonb  -- שדות מותאמים. מפתחות שימושיים: utm_source, utm_medium,
                 -- utm_campaign, utm_content, landingpage, form_name
-  answers jsonb -- תשובות השאלון הפיננסי (אם מולא)
-  compass_status text  -- not_scheduled/scheduled/met_no_progress/progressed (רק אם בלוח פגישות מצפן)
+  answers jsonb -- תשובות שאלון המועמדות (אם מולא)
+  compass_status text  -- not_scheduled/scheduled/met_no_progress/progressed (רק אם בלוח פגישות ההתאמה)
   compass_entered_at timestamptz
   converted_client_id uuid  -- אם הומר ללקוח
   created_at timestamptz    -- מתי נכנס לראשונה
@@ -35,7 +37,7 @@ TABLE lead_activity  -- יומן תיעוד של כל ליד
 
 TABLE clients  -- לקוחות (מי שסגר)
   id uuid, email text, google_name text,
-  answers jsonb  -- תשובות השאלון. מפתחות: fullName, phone, idNumber, birthDate, city ועוד
+  answers jsonb  -- תשובות השאלון. מפתחות: fullName, phone, idNumber, birthDate, city, instagram ועוד
   status text    -- draft=טיוטה, submitted=הגיש שאלון, manual=לקוח ידני
   stage text     -- new=חדש, financing=מימון, assignment=לשיבוץ, signed=חתמו דירה
   from_lead_id uuid -> leads.id, from_lead_source text, converted_by_name text,
@@ -47,7 +49,7 @@ TABLE client_files  -- קבצים שהעלה לקוח
 TABLE admin_notes  -- הערות פנימיות על לקוח
   id uuid, client_id uuid -> clients.id, text text, author_name text, created_at timestamptz
 
-TABLE deals  -- עסקאות נדל"ן
+TABLE deals  -- עסקאות (נשאר מהשלד, לא בשימוש אצל Tattoo Story)
   id uuid, title text, status text, data jsonb (city, dealType, price, expectedProfit),
   created_at timestamptz, updated_at timestamptz
 

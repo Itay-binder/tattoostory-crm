@@ -30,9 +30,9 @@ function fmtDate(s: string): string {
 function fmtSize(b: number): string { return b > 1024 * 1024 ? `${(b / 1048576).toFixed(1)} MB` : `${Math.ceil(b / 1024)} KB`; }
 
 // נמעני ווצאפ קבועים
-const WA_RECIPIENTS: Record<"mik" | "dean", { label: string; num: string }> = {
-  mik: { label: "מיק", num: "972542226289" },
-  dean: { label: "דין", num: "972528777824" },
+// נמענים קבועים לשליחת פרטי ליד/לקוח בווצאפ. להוסיף כאן את ליאור כשיהיה מספר.
+const WA_RECIPIENTS: Record<"itay", { label: string; num: string }> = {
+  itay: { label: "איתי", num: "972526660006" },
 };
 
 // נרמול מספר ישראלי לפורמט בינלאומי (0526660006 → 972526660006)
@@ -59,7 +59,7 @@ export default function ClientDetail({ params }: { params: Promise<{ uid: string
   const [waBusy, setWaBusy] = useState(false);
   const [waMsg, setWaMsg] = useState<string | null>(null);
   const [waOpen, setWaOpen] = useState(false);
-  const [waTarget, setWaTarget] = useState<"mik" | "dean" | "other">("mik");
+  const [waTarget, setWaTarget] = useState<"itay" | "other">("itay");
   const [waOther, setWaOther] = useState("");
   // קישור לקוח נוסף (זוג/שותפים)
   const [templates, setTemplates] = useState<{ id: string; name: string }[]>([]);
@@ -279,7 +279,7 @@ export default function ClientDetail({ params }: { params: Promise<{ uid: string
         <div className="pcf-card" style={{ marginTop: 10, padding: 16 }}>
           <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
             <span style={{ fontWeight: 700 }}>שליחת פרטי הלקוח אל:</span>
-            {([["mik", "מיק"], ["dean", "דין"], ["other", "אחר"]] as const).map(([k, l]) => (
+            {([["itay", "איתי"], ["other", "אחר"]] as const).map(([k, l]) => (
               <button key={k} type="button" className={`pcf-pill${waTarget === k ? " active" : ""}`} onClick={() => setWaTarget(k)}>{l}</button>
             ))}
             {waTarget === "other" && (

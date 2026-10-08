@@ -526,20 +526,20 @@ export async function convertLeadToClient(id: string, by: { email: string; name:
   await supa().from("leads").update({ stage: "won", converted_client_id: clientUid, updated_at: now }).eq("id", id);
   await insertActivity(id, { type: "system", source: "manual", by: repName, text: `הליד סומן כ-WON והומר ללקוח ע"י ${repName}` });
 
-  // הליד נכנס אוטומטית לצינור "פגישות מצפן"
+  // הליד נכנס אוטומטית לצינור "פגישות התאמה"
   await enterCompass(id, repName);
 
   return { lead: (await getLead(id))!, clientUid };
 }
 
-/** מכניס ליד לצינור "פגישות מצפן" (אם לא כבר בפנים). נקרא בעת סגירה/WON. */
+/** מכניס ליד לצינור "פגישות התאמה" (אם לא כבר בפנים). נקרא בעת סגירה/WON. */
 export async function enterCompass(id: string, by = "מערכת"): Promise<Lead | null> {
   const lead = await getLead(id);
   if (!lead) return null;
   if (lead.compassStatus) return lead; // כבר בצינור — לא לדרוס סטטוס קיים
   const now = nowIso();
   await supa().from("leads").update({ compass_status: "not_scheduled", compass_entered_at: now, updated_at: now }).eq("id", id);
-  await insertActivity(id, { type: "system", source: "manual", by, text: "🧭 נכנס לצינור פגישות מצפן (טרם תואמה פגישה)" });
+  await insertActivity(id, { type: "system", source: "manual", by, text: "🧭 נכנס לצינור פגישות התאמה (טרם תואמה פגישה)" });
   return getLead(id);
 }
 
@@ -569,18 +569,18 @@ export async function assignLead(id: string, email: string | null, by: string): 
   return getLead(id);
 }
 
-/** מסיר ליד מלוח פגישות המצפן. הליד עצמו נשאר במערכת. */
+/** מסיר ליד מלוח פגישות ההתאמה. הליד עצמו נשאר במערכת. */
 export async function leaveCompass(id: string, by: string): Promise<boolean> {
   const lead = await getLead(id);
   if (!lead) return false;
   await supa().from("leads").update({ compass_status: null, compass_entered_at: null, updated_at: nowIso() }).eq("id", id);
-  await insertActivity(id, { type: "system", source: "manual", by, text: "🧭 הוסר מלוח פגישות מצפן" });
+  await insertActivity(id, { type: "system", source: "manual", by, text: "🧭 הוסר מלוח פגישות התאמה" });
   return true;
 }
 
 /**
- * רשימת כל הלידים שנמצאים בצינור פגישות מצפן.
- * התיעוד מוגבל ל-50 הרשומות האחרונות לכל ליד — הכרטיס במסך המצפן הוא תצוגה
+ * רשימת כל הלידים שנמצאים בצינור פגישות התאמה.
+ * התיעוד מוגבל ל-50 הרשומות האחרונות לכל ליד — הכרטיס במסך פגישות ההתאמה הוא תצוגה
  * מקוצרת; לתיעוד המלא נכנסים לכרטיס הליד עצמו.
  */
 export async function listCompassMeetings(): Promise<Lead[]> {
@@ -595,12 +595,12 @@ export async function listCompassMeetings(): Promise<Lead[]> {
   return (data as LeadRow[]).map(rowToLead);
 }
 
-/** עדכון סטטוס פגישת מצפן של ליד. */
+/** עדכון סטטוס פגישת התאמה של ליד. */
 export async function setCompassStatus(id: string, status: CompassStatus, by: string): Promise<Lead | null> {
   const lead = await getLead(id);
   if (!lead) return null;
   await supa().from("leads").update({ compass_status: status, updated_at: nowIso() }).eq("id", id);
-  await insertActivity(id, { type: "system", source: "manual", by, text: `🧭 סטטוס פגישת מצפן עודכן ל: ${compassStatusLabel(status)}` });
+  await insertActivity(id, { type: "system", source: "manual", by, text: `🧭 סטטוס פגישת התאמה עודכן ל: ${compassStatusLabel(status)}` });
   return getLead(id);
 }
 

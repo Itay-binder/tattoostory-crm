@@ -1,10 +1,10 @@
-// לוגיקת סוכן רגב — תזכורות פגישות. משותפת ל-Vercel Cron (הפרודקשן) ולבדיקה ידנית.
-// סורק את פגישות היום ביומן regev@, מוצא טלפון לפי מייל, ושולח ווצאפ (GreenAPI סוכן רגב).
+// תזכורות פגישות. משותפת ל-Vercel Cron (הפרודקשן) ולבדיקה ידנית.
+// סורק את פגישות היום ביומן הראשי, מוצא טלפון לפי מייל, ושולח ווצאפ (GreenAPI Tattoo Story).
 import { GoogleAuth } from "google-auth-library";
 import { supa } from "@/lib/supabaseAdmin";
 import { normalizeEmail } from "@/lib/leads";
 
-const REGEV_CAL = "regev@powercouple.co.il";
+const REGEV_CAL = process.env.MEETINGS_CALENDAR_USER || "liorrubin3@gmail.com";
 const TZ = "Asia/Jerusalem";
 
 const fmtDateIL = (d: Date) => new Intl.DateTimeFormat("en-CA", { timeZone: TZ }).format(d);
@@ -13,16 +13,12 @@ const firstName = (name: string) => (name || "").trim().split(/\s+/)[0] || "";
 
 export function buildReminderMessage(name: string, time: string): string {
   return `היי ${name},
-מזכיר לך שהיום מתקיימת הפגישה שלנו בשעה ${time}
+מזכירים לך שהיום מתקיימת פגישת ההתאמה שלנו בשעה ${time}
 
-המשרדים שלנו ממוקמים בשדרות הראשונים 23, ראשון לציון בניין מילניה B.
-יש חניית אפר בסמוך למתחם:
-https://maps.app.goo.gl/TtgHo97a2BEeXGLS9
+הפגישה בזום, נשלח לך את הקישור סמוך לשעה.
 
-במידה והפגישה נקבעה בזום אין למה להתייחס לכתובת המשרדים.
-
-לכל שינוי או עזרה זמין כאן בווצאפ,
-רגב.`;
+לכל שינוי או עזרה אנחנו כאן בווצאפ,
+Tattoo Story Academy`;
 }
 
 interface CalEvent {
@@ -48,7 +44,7 @@ async function todaysEvents(): Promise<CalEvent[]> {
 }
 
 function clientContactOf(ev: CalEvent): { email: string; name: string } | null {
-  const ext = (ev.attendees || []).find((a) => a.email && !a.resource && !/@powercouple\.co\.il$/i.test(a.email) && !/@group\.calendar\.google\.com$/i.test(a.email));
+  const ext = (ev.attendees || []).find((a) => a.email && !a.resource && !/@tattoostoryacademy\.com$/i.test(a.email) && !/@group\.calendar\.google\.com$/i.test(a.email));
   if (ext?.email) return { email: ext.email, name: ext.displayName || "" };
   const m = (ev.description || "").match(/[\w.+-]+@[\w-]+\.[\w.-]+/);
   return m ? { email: m[0], name: "" } : null;
@@ -66,8 +62,8 @@ async function lookupPhone(email: string): Promise<{ phone: string; name: string
 }
 
 async function sendWhatsapp(phone: string, message: string): Promise<string> {
-  const inst = process.env.PC_GREENAPI_REGEV_INSTANCE, tok = process.env.PC_GREENAPI_REGEV_TOKEN;
-  if (!inst || !tok) throw new Error("חסרים פרטי GreenAPI סוכן רגב (env)");
+  const inst = process.env.GREENAPI_INSTANCE, tok = process.env.GREENAPI_TOKEN;
+  if (!inst || !tok) throw new Error("חסרים פרטי GreenAPI (env)");
   const chatId = `${String(phone).replace(/\D/g, "")}@c.us`;
   const url = `https://api.green-api.com/waInstance${inst}/sendMessage/${tok}`;
   // 3 ניסיונות — תקלת רשת רגעית מ-Vercel ל-GreenAPI לא תפיל תזכורת

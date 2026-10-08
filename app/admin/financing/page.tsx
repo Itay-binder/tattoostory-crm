@@ -61,7 +61,7 @@ export default function FinancingPage() {
   const login = async () => { await setPersistence(firebaseAuth(), browserLocalPersistence); await signInWithPopup(firebaseAuth(), googleProvider).catch(() => {}); };
 
   if (!authReady) return <main className="pcf-wrap pcf-wide"><div className="pcf-spin" style={{ margin: "60px auto" }} /></main>;
-  if (!user) return <main className="pcf-wrap pcf-wide"><header className="pcf-hero"><span className="pcf-badge">ניהול • פאוור קאפל</span><h1>כניסת מנהלים</h1></header><div className="pcf-card pcf-login"><button className="pcf-btn white" onClick={login}>התחברות עם Google</button></div></main>;
+  if (!user) return <main className="pcf-wrap pcf-wide"><header className="pcf-hero"><span className="pcf-badge">ניהול • Tattoo Story</span><h1>כניסת מנהלים</h1></header><div className="pcf-card pcf-login"><button className="pcf-btn white" onClick={login}>התחברות עם Google</button></div></main>;
   if (denied) return <main className="pcf-wrap pcf-wide"><AdminNav /><div className="pcf-card" style={{ textAlign: "center" }}><p>החשבון <b>{user.email}</b> אינו מורשה.</p></div></main>;
 
   const alreadyIn = new Set(cases.map((c) => c.clientId));
@@ -71,7 +71,7 @@ export default function FinancingPage() {
       <AdminNav />
       <div className="pcf-admin-top">
         <div>
-          <span className="pcf-badge">ניהול • פאוור קאפל</span>
+          <span className="pcf-badge">ניהול • Tattoo Story</span>
           <h1 style={{ fontSize: 28, margin: "12px 0 0" }}>מימון <span style={{ fontSize: 16, color: "var(--muted)", fontWeight: 400 }}>({cases.length})</span></h1>
         </div>
         <button className="pcf-btn" style={{ padding: "10px 18px", fontSize: 14 }} onClick={openAdd}>+ הוסף לקוח למימון</button>

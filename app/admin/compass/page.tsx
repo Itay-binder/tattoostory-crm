@@ -38,7 +38,7 @@ export default function CompassPage() {
   useEffect(() => {
     if (!user || defaultApplied.current) return;
     defaultApplied.current = true;
-    if ((user.email || "").toLowerCase() === "blog@powercouple.co.il") setFilter("scheduled");
+    if ((user.email || "").toLowerCase() === "liorrubin3@gmail.com") setFilter("scheduled");
   }, [user]);
 
   const load = useCallback(async () => {
@@ -49,7 +49,7 @@ export default function CompassPage() {
       if (res.status === 403) { setDenied(true); return; }
       if (!res.ok) throw new Error();
       setMeetings((await res.json()).meetings || []);
-    } catch { setErr("שגיאה בטעינת פגישות המצפן"); } finally { setLoading(false); }
+    } catch { setErr("שגיאה בטעינת פגישות ההתאמה"); } finally { setLoading(false); }
   }, []);
   useEffect(() => { if (user) load(); }, [user, load]);
 
@@ -67,9 +67,9 @@ export default function CompassPage() {
     } catch (e) { setMsg(`נכשל — ${(e as Error).message}`); }
   };
 
-  /** מסיר את הליד מלוח פגישות המצפן. הליד עצמו נשאר במערכת. */
+  /** מסיר את הליד מלוח פגישות ההתאמה. הליד עצמו נשאר במערכת. */
   const removeFromBoard = async (id: string, name: string) => {
-    const confirm = window.prompt(`הסרת "${name || "הליד"}" מלוח פגישות המצפן. (הליד עצמו יישאר במערכת)\n\nהקלד DELETE לאישור:`);
+    const confirm = window.prompt(`הסרת "${name || "הליד"}" מלוח פגישות ההתאמה. (הליד עצמו יישאר במערכת)\n\nהקלד DELETE לאישור:`);
     if (confirm !== "DELETE") return;
     setMsg(null);
     try {
@@ -99,7 +99,7 @@ export default function CompassPage() {
   const pagedShown = shown.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   if (!authReady) return <main className="pcf-wrap pcf-wide"><div className="pcf-spin" style={{ margin: "60px auto" }} /></main>;
-  if (!user) return <main className="pcf-wrap pcf-wide"><header className="pcf-hero"><span className="pcf-badge">ניהול • פאוור קאפל</span><h1>כניסת מנהלים</h1></header><div className="pcf-card pcf-login"><button className="pcf-btn white" onClick={login}>התחברות עם Google</button></div></main>;
+  if (!user) return <main className="pcf-wrap pcf-wide"><header className="pcf-hero"><span className="pcf-badge">ניהול • Tattoo Story</span><h1>כניסת מנהלים</h1></header><div className="pcf-card pcf-login"><button className="pcf-btn white" onClick={login}>התחברות עם Google</button></div></main>;
   if (denied) return <main className="pcf-wrap pcf-wide"><AdminNav /><div className="pcf-card" style={{ textAlign: "center" }}><p>החשבון <b>{user.email}</b> אינו מורשה.</p></div></main>;
 
   return (
@@ -107,9 +107,9 @@ export default function CompassPage() {
       <AdminNav />
       <div className="pcf-admin-top">
         <div>
-          <span className="pcf-badge">ניהול • פאוור קאפל</span>
-          <h1 style={{ fontSize: 28, margin: "12px 0 0" }}>🧭 פגישות מצפן <span style={{ fontSize: 16, color: "var(--muted)", fontWeight: 400 }}>({shown.length}{shown.length !== meetings.length ? ` מתוך ${meetings.length}` : ""})</span></h1>
-          <p style={{ color: "var(--muted)", margin: "6px 0 0", fontSize: 14 }}>לידים שנסגרו ונכנסו לתהליך פגישת המצפן. עדכנו סטטוס וצפו בכל התיעוד.</p>
+          <span className="pcf-badge">ניהול • Tattoo Story</span>
+          <h1 style={{ fontSize: 28, margin: "12px 0 0" }}>🧭 פגישות התאמה <span style={{ fontSize: 16, color: "var(--muted)", fontWeight: 400 }}>({shown.length}{shown.length !== meetings.length ? ` מתוך ${meetings.length}` : ""})</span></h1>
+          <p style={{ color: "var(--muted)", margin: "6px 0 0", fontSize: 14 }}>לידים שנסגרו ונכנסו לתהליך פגישת ההתאמה. עדכנו סטטוס וצפו בכל התיעוד.</p>
         </div>
       </div>
 
@@ -183,7 +183,7 @@ export default function CompassPage() {
               </div>
             );
           })}
-          {shown.length === 0 && <div className="pcf-card" style={{ textAlign: "center", padding: 40, color: "var(--muted)" }}>אין פגישות מצפן {filter !== "all" ? "בסטטוס זה" : "עדיין"}. ליד נכנס לכאן ברגע שסוגרים אותו (WON).</div>}
+          {shown.length === 0 && <div className="pcf-card" style={{ textAlign: "center", padding: 40, color: "var(--muted)" }}>אין פגישות התאמה {filter !== "all" ? "בסטטוס זה" : "עדיין"}. ליד נכנס לכאן ברגע שסוגרים אותו (WON).</div>}
           {pageCount > 1 && (
             <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 12, padding: "6px 0 12px" }}>
               <button className="pcf-btn ghost" style={{ padding: "6px 14px", fontSize: 13 }} disabled={page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>← הקודם</button>

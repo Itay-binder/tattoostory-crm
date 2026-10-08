@@ -17,8 +17,8 @@ export async function markPortalPayment(returnValue: string, paid: boolean, amou
   } else {
     // אידמפוטנטי: אם כבר לקוח — לא לתעד/להמיר שוב.
     if (lead.convertedClientUid) return { marked: true, step: "compass", leadId: lead.id };
-    await addLeadActivity(lead.id, { type: "system", source: "api", by: "סליקת CardCom (פורטל)", text: `💳 בוצעה סליקה — ${amountText} — פגישת מצפן` });
-    await convertLeadToClient(lead.id, { email: "blog@powercouple.co.il", name: "סליקת CardCom (פורטל)" });
+    await addLeadActivity(lead.id, { type: "system", source: "api", by: "סליקת CardCom (פורטל)", text: `💳 בוצעה סליקה — ${amountText} — פגישת התאמה` });
+    await convertLeadToClient(lead.id, { email: "liorrubin3@gmail.com", name: "סליקת CardCom (פורטל)" });
   }
   return { marked: true, step: step || "compass", leadId: lead.id };
 }

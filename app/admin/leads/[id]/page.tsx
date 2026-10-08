@@ -15,9 +15,9 @@ function fmtDate(s: string): string {
   catch { return s; }
 }
 
-const WA_RECIPIENTS: Record<"mik" | "dean", { label: string; num: string }> = {
-  mik: { label: "מיק", num: "972542226289" },
-  dean: { label: "דין", num: "972528777824" },
+// נמענים קבועים לשליחת פרטי ליד/לקוח בווצאפ. להוסיף כאן את ליאור כשיהיה מספר.
+const WA_RECIPIENTS: Record<"itay", { label: string; num: string }> = {
+  itay: { label: "איתי", num: "972526660006" },
 };
 function normalizeIL(raw: string): string {
   let d = (raw || "").replace(/\D/g, "");
@@ -52,7 +52,7 @@ export default function LeadDetail({ params }: { params: Promise<{ id: string }>
   const [noteBusy, setNoteBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [waOpen, setWaOpen] = useState(false);
-  const [waTarget, setWaTarget] = useState<"mik" | "dean" | "other">("mik");
+  const [waTarget, setWaTarget] = useState<"itay" | "other">("itay");
   const [waOther, setWaOther] = useState("");
   const [waBusy, setWaBusy] = useState(false);
   const [meetOpen, setMeetOpen] = useState(false);
@@ -293,7 +293,7 @@ export default function LeadDetail({ params }: { params: Promise<{ id: string }>
         <div className="pcf-card" style={{ marginTop: 6, padding: 16 }}>
           <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
             <span style={{ fontWeight: 700 }}>שליחת פרטי הליד אל:</span>
-            {([["mik", "מיק"], ["dean", "דין"], ["other", "אחר"]] as const).map(([k, l]) => (
+            {([["itay", "איתי"], ["other", "אחר"]] as const).map(([k, l]) => (
               <button key={k} type="button" className={`pcf-pill${waTarget === k ? " active" : ""}`} onClick={() => setWaTarget(k)}>{l}</button>
             ))}
             {waTarget === "other" && <input value={waOther} onChange={(e) => setWaOther(e.target.value)} placeholder="0521234567" dir="ltr" style={{ padding: "8px 12px", borderRadius: 10, border: "1px solid var(--line)", background: "var(--bg)", color: "inherit", fontSize: 15, minWidth: 160, textAlign: "right" }} />}

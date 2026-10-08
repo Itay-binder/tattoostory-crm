@@ -1,4 +1,4 @@
-// סכמת השאלון הפיננסי — משותפת לקליינט (רינדור) ולשרת (Doc/PDF/Webhook)
+// סכמת שאלון המועמדות של האקדמיה — משותפת לקליינט (רינדור) ולשרת (Doc/PDF/Webhook)
 
 export type FieldType = "text" | "tel" | "number" | "date" | "select" | "radio" | "textarea" | "yesno";
 
@@ -31,58 +31,58 @@ export const SECTIONS: Section[] = [
       { key: "phone", label: "טלפון נייד", type: "tel", required: true, placeholder: "050-0000000" },
       { key: "birthDate", label: "תאריך לידה", type: "date", required: true },
       { key: "age", label: "גיל", type: "number" },
-      { key: "maritalStatus", label: "מצב משפחתי", type: "select", required: true, options: ["רווק/ה", "נשוי/אה", "ידועים בציבור", "גרוש/ה", "אלמן/ה"] },
-      { key: "childrenCount", label: "מספר ילדים (אם רלוונטי)", type: "number" },
-      { key: "city", label: "מקום מגורים (עיר)", type: "text", required: true },
-      { key: "address", label: "כתובת מלאה", type: "text", required: true },
-      { key: "housingType", label: "סוג מגורים", type: "radio", required: true, options: ["שכירות", "בעלות", "אחר"] },
-      { key: "housingTenure", label: "ותק במקום המגורים הנוכחי", type: "text", placeholder: "למשל: 3 שנים" },
+      { key: "city", label: "עיר מגורים", type: "text", required: true },
+      { key: "address", label: "כתובת מלאה", type: "text" },
+      { key: "instagram", label: "שם המשתמש באינסטגרם", type: "text", placeholder: "@username" },
     ],
   },
   {
-    key: "employment",
-    title: "תעסוקה והכנסות",
-    icon: "💼",
+    key: "background",
+    title: "רקע אמנותי",
+    icon: "🎨",
     fields: [
-      { key: "workplace", label: "מקום עבודה נוכחי", type: "text", required: true },
-      { key: "role", label: "תפקיד", type: "text", required: true },
-      { key: "jobTenure", label: "ותק במקום העבודה", type: "text", required: true, placeholder: "למשל: שנתיים" },
-      { key: "employmentType", label: "סוג העסקה", type: "radio", required: true, options: ["שכיר", "עצמאי"] },
-      { key: "netIncome", label: "הכנסה חודשית נטו (₪)", type: "number", required: true },
-      { key: "extraIncome", label: "הכנסות נוספות (אם קיימות)", type: "textarea", placeholder: "מקור וסכום" },
+      { key: "artExperience", label: "יש לך רקע באמנות או ציור", type: "yesno", required: true },
+      { key: "artExperienceDetails", label: "ספרי/ספר על הרקע", type: "textarea", showIf: { key: "artExperience", equals: "כן" }, required: true },
+      { key: "tattooExperience", label: "ניסיון קודם בקעקועים", type: "radio", required: true, options: ["אין ניסיון בכלל", "התנסיתי על עור סינטטי", "קעקעתי על אנשים", "עובד/ת בתחום"] },
+      { key: "drawingStyle", label: "איזה סגנון מדבר אליך", type: "textarea", placeholder: "לדוגמה: פוינטיליזם, פיין ליין, בלאק וורק" },
+      { key: "portfolioLink", label: "קישור לתיק עבודות (אם יש)", type: "text", placeholder: "דרייב / אינסטגרם / בהאנס" },
     ],
   },
   {
-    key: "banks",
-    title: "חשבונות בנק",
-    icon: "🏦",
+    key: "goals",
+    title: "מטרות",
+    icon: "🎯",
     fields: [
-      { key: "activeBanks", label: "באילו בנקים קיימים חשבונות פעילים", type: "textarea", required: true },
-      { key: "mainBank", label: "מהו הבנק המרכזי", type: "text", required: true },
-      { key: "mainBankTenure", label: "ותק החשבון המרכזי", type: "text" },
-      { key: "otherAccounts", label: "חשבונות נוספים או סגורים בשנים האחרונות", type: "textarea" },
+      { key: "whyTattoo", label: "למה קעקועים — מה הביא אותך לכאן", type: "textarea", required: true },
+      { key: "goals", label: "מה המטרות שלך מההכשרה", type: "textarea", required: true },
+      { key: "successVision", label: "איזו תוצאה תהיה בעיניך הצלחה מסחררת", type: "textarea", required: true },
+      { key: "timeline", label: "מתי בא לך להתחיל לעבוד מזה", type: "radio", options: ["מיד בסיום ההכשרה", "תוך חצי שנה", "תוך שנה", "עדיין לא יודע/ת"] },
+      { key: "currentWork", label: "במה את/ה עוסק/ת היום", type: "text" },
     ],
   },
   {
-    key: "loans",
-    title: "התחייבויות והלוואות",
-    icon: "📋",
+    key: "commitment",
+    title: "מחויבות לתהליך",
+    icon: "💪",
     fields: [
-      { key: "hasLoans", label: "האם קיימות הלוואות פעילות", type: "yesno", required: true },
-      { key: "loanTypes", label: "סוגי ההלוואות (משכנתא / גישור / צרכנית / קרנות השתלמות וכו')", type: "textarea", showIf: { key: "hasLoans", equals: "כן" }, required: true },
-      { key: "monthlyRepayment", label: "החזר חודשי כולל (₪)", type: "number", showIf: { key: "hasLoans", equals: "כן" }, required: true },
-      { key: "totalLoanBalance", label: "יתרת הלוואות כוללת (₪)", type: "number", showIf: { key: "hasLoans", equals: "כן" }, required: true },
-      { key: "hasGuarantors", label: "האם קיימים ערבים להלוואות", type: "yesno", showIf: { key: "hasLoans", equals: "כן" } },
+      { key: "seriousness", label: "כמה רציני/ת בסולם 1-10", type: "number", required: true },
+      { key: "weeklyHours", label: "כמה שעות בשבוע תוכל/י להקדיש לתרגול", type: "radio", required: true, options: ["עד 4 שעות", "4-8 שעות", "8-15 שעות", "מעל 15 שעות"] },
+      { key: "understandsTime", label: "מבין/ה שצריך לפחות 4 שעות תרגול בשבוע", type: "yesno", required: true },
+      { key: "willDoTasks", label: "מתחייב/ת לבצע את המשימות בין המפגשים", type: "yesno", required: true },
+      { key: "needsPractice", label: "מבין/ה שבלי יישום לא יהיו תוצאות", type: "yesno", required: true },
+      { key: "notQuickMoney", label: "מבין/ה שזו לא התעשרות מהירה אלא מקצוע", type: "yesno", required: true },
+      { key: "sessionRecordings", label: "מסכים/ה שהמפגשים החיים מוקלטים", type: "yesno", required: true },
     ],
   },
   {
-    key: "assets",
-    title: "חסכונות ונכסים",
-    icon: "💰",
+    key: "logistics",
+    title: "לוגיסטיקה",
+    icon: "📅",
     fields: [
-      { key: "deposits", label: "פיקדונות / חסכונות קיימים", type: "textarea" },
-      { key: "pensionFunds", label: "קרנות השתלמות / קופות גמל", type: "textarea" },
-      { key: "realEstate", label: "נכסי נדל\"ן קיימים (אם יש)", type: "textarea" },
+      { key: "howHeard", label: "איך הגעת אלינו", type: "select", required: true, options: ["אינסטגרם", "פייסבוק", "טיקטוק", "יוטיוב", "המלצה מחברה", "גוגל", "דף נחיתה", "אחר"] },
+      { key: "hasEquipment", label: "יש לך ציוד קעקוע", type: "yesno" },
+      { key: "availability", label: "אילו ימים ושעות נוחים לך למפגשים", type: "textarea" },
+      { key: "paymentPreference", label: "העדפת תשלום", type: "radio", options: ["תשלום מלא", "פריסה לתשלומים", "עדיין בודק/ת"] },
     ],
   },
   {
@@ -90,8 +90,8 @@ export const SECTIONS: Section[] = [
     title: "מידע נוסף",
     icon: "📝",
     fields: [
-      { key: "irregularities", label: "החזרות או חריגות בחשבון בשנים האחרונות (אם היו)", type: "textarea" },
-      { key: "notes", label: "הערות נוספות שחשוב שנדע לצורך הבדיקה", type: "textarea" },
+      { key: "healthNotes", label: "משהו רפואי שחשוב שנדע (אלרגיות, רגישויות)", type: "textarea" },
+      { key: "notes", label: "הערות נוספות", type: "textarea" },
     ],
   },
 ];
@@ -105,11 +105,10 @@ export interface FileCategory {
 }
 
 export const FILE_CATEGORIES: FileCategory[] = [
-  { key: "bankStatements", label: "עו\"ש 3 חודשים אחרונים", hint: "קובץ PDF מכל אחד מהחשבונות", multiple: true, required: true },
-  { key: "balancesSummary", label: "ריכוז יתרות", multiple: true, required: true },
-  { key: "loansSummary", label: "ריכוז הלוואות", hint: "רק אם יש הלוואות פעילות", multiple: true, required: { key: "hasLoans", equals: "כן" } },
-  { key: "idDocs", label: "תעודת זהות משני הצדדים + ספח", multiple: true, required: true },
-  { key: "paySlips", label: "3 תלושי שכר אחרונים", hint: "לשכירים", multiple: true, required: { key: "employmentType", equals: "שכיר" } },
+  { key: "idDocs", label: "צילום תעודת זהות", hint: "לצורך ההסכם", multiple: false, required: true },
+  { key: "portfolio", label: "תיק עבודות / איורים", hint: "תמונות של ציורים או קעקועים שעשית", multiple: true, required: true },
+  { key: "paymentConfirm", label: "אישור תשלום / העברה בנקאית", multiple: true, required: false },
+  { key: "equipmentPhotos", label: "תמונות הציוד שלך", hint: "רק אם יש לך ציוד", multiple: true, required: { key: "hasEquipment", equals: "כן" } },
 ];
 
 export type Answers = Record<string, string>;

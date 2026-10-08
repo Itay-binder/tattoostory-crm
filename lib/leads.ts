@@ -16,30 +16,28 @@ export function normalizeIsraeliPhone(raw: string): string {
 /** שלבי המשפך — משותפים ללידים וללקוחות (לדשבורד). */
 export const LEAD_STAGES = [
   { key: "new", label: "ליד חדש" },
-  { key: "contacted", label: "יצאה שיחה" },
-  { key: "no_answer_1", label: "אין מענה 1" },
-  { key: "no_answer_2", label: "אין מענה 2" },
-  { key: "no_answer_3", label: "אין מענה 3" },
-  { key: "followup", label: "פולואפ" },
-  { key: "watching", label: "במעקב" },
-  { key: "relevant", label: "ליד רלוונטי" },
-  // תיאום עצמי מהאתר — הלקוח קבע פגישה ביומן (Cal.com בדף vsltnx) אחרי הרשמה ב-VSL
-  { key: "meeting_scheduled", label: "תיאם פגישה" },
-  { key: "compass", label: "הגיע לפגישת מצפן" },
-  { key: "progressed", label: "התקדם לתהליך" },
-  { key: "in_process", label: "בתהליך" },
-  { key: "done", label: "סיים תהליך" },
-  { key: "won", label: "סגר (לקוח)" },
+  { key: "contacted", label: "שיחה 1 יצאה" },
+  { key: "no_answer_1", label: "שתי שיחות יצאו" },
+  { key: "no_answer_2", label: "שלוש שיחות יצאו" },
+  { key: "no_answer_3", label: "4 שיחות יצאו" },
+  { key: "followup", label: "פולואפ עתידי" },
+  { key: "watching", label: "נשלחה הודעה" },
+  { key: "relevant", label: "מתעניינת" },
+  // תיאום עצמי מהאתר — הליד קבע שיחה ביומן
+  { key: "meeting_scheduled", label: "נקבעה שיחה" },
+  { key: "compass", label: "הגיעה לפגישת התאמה" },
+  { key: "progressed", label: "התקדמה לתהליך" },
+  { key: "in_process", label: "בטיפול" },
+  { key: "done", label: "סיימה הכשרה" },
+  { key: "won", label: "נסגר (לקוחה)" },
   { key: "lost", label: "לא רלוונטי" },
-  // רדום — ליד שנכנס מ-Optione ואיש לא נגע בו 45+ יום. נמצא מחוץ למשפך בכוונה:
+  // רדום — ליד שאיש לא נגע בו 45+ יום. נמצא מחוץ למשפך בכוונה:
   // אינו מזייף את יחסי ההמרה בדשבורד (funnelIdx מחזיר -1), ואינו נכנס לתור
   // "תותח השיחות" ב-PHONECRM, שמושך רק new/in_progress/followup.
-  // ניתן להחזיר ליד רדום ל"ליד חדש" בכל רגע מכרטיס הליד.
   { key: "dormant", label: "ליד רדום" },
-  // ייבוא היסטורי מ-Pipedrive. שניהם מחוץ למשפך הדשבורד בכוונה (funnelIdx=-1)
-  // וגם לא נמשכים לתותח השיחות ב-PHONECRM — כדי לא לפגוע בסטטיסטיקות/בתור החיוג.
-  { key: "pipe", label: "רשום פייפ" },        // איש קשר מ-Pipedrive שלא נסגר
-  { key: "won_pipe", label: "WON PIPE" },      // סגר עסקה ב-Pipedrive
+  // ייבוא היסטורי. שניהם מחוץ למשפך הדשבורד בכוונה (funnelIdx=-1).
+  { key: "pipe", label: "ייבוא היסטורי" },
+  { key: "won_pipe", label: "סגר בעבר" },
 ] as const;
 
 export type LeadStage = (typeof LEAD_STAGES)[number]["key"];
@@ -65,11 +63,11 @@ export function leadTempEmoji(submitCount: number | string | undefined): string 
 const NO_QUICK_TAB = new Set(["progressed", "in_process", "done"]);
 export const QUICK_FILTER_STAGES = LEAD_STAGES.filter((s) => !NO_QUICK_TAB.has(s.key));
 
-/** סטטוסי "פגישות מצפן" — צינור נפרד שאליו נכנס ליד ברגע שנסגר (WON). */
+/** סטטוסי "פגישות התאמה" — צינור נפרד שאליו נכנס ליד ברגע שנסגר (WON). */
 export const COMPASS_STATUSES = [
   { key: "not_scheduled", label: "טרם תואמה פגישה" },
   { key: "scheduled", label: "תואמה פגישה" },
-  { key: "met_no_progress", label: "בוצעה פגישה טרם התקדם" },
+  { key: "met_no_progress", label: "בוצעה פגישה טרם התקדמה" },
   { key: "progressed", label: "התקדם" },
 ] as const;
 
@@ -79,15 +77,15 @@ export function compassStatusLabel(key: string): string {
   return COMPASS_STATUSES.find((s) => s.key === key)?.label || key;
 }
 
-/** מקורות הגעה (filtertnx) — הבסיס לפילוח בדשבורד. */
+/** מקורות הגעה — הבסיס לפילוח בדשבורד. */
 export const LEAD_SOURCES = [
-  "המלצה מחבר",
   "אינסטגרם",
   "פייסבוק",
   "טיקטוק",
   "יוטיוב",
-  "מודעת פופ-אפ",
-  "אתגרים / מדריכים חינמיים",
+  "המלצה מחברה",
+  "גוגל",
+  "דף נחיתה",
   "אחר",
 ] as const;
 
@@ -105,7 +103,7 @@ export function utmLabel(key: string): string {
   return UTM_FIELDS.find((f) => f.key === key)?.label || key;
 }
 
-/** שדות ההסמכה מהשאלון ב-powercouple.co.il/filtertnx — נשמרים תחת lead.quali */
+/** שדות ההסמכה משאלון המועמדות של האקדמיה — נשמרים תחת lead.quali */
 export interface QualiField {
   key: string;
   label: string;
@@ -115,19 +113,19 @@ export interface QualiField {
 
 export const QUALI_FIELDS: QualiField[] = [
   { key: "source", label: "איך הגעת אלינו", type: "radio", options: [...LEAD_SOURCES] },
-  { key: "familiarity", label: "רמת היכרות", type: "radio", options: ["מכיר/ה אתכם ואת התהליך ורוצה להתחיל", "ראיתי אתכם כמה פעמים", "מכיר/ה מזמן אבל יש לי חששות", "ראיתי מודעה והתעניינתי"] },
-  { key: "knownDuration", label: "כמה זמן אתם מכירים אותנו", type: "radio", options: ["גיליתי אתכם לאחרונה", "פחות מ-3 חודשים", "3–6 חודשים", "מעל 6 חודשים"] },
+  { key: "gender", label: "מין", type: "radio", options: ["נקבה", "זכר"] },
   { key: "age", label: "גיל", type: "number" },
-  { key: "gender", label: "מין", type: "radio", options: ["זכר", "נקבה"] },
-  { key: "maritalStatus", label: "מצב משפחתי", type: "radio", options: ["נשוי/אה", "רווק/ה", "ידוע/ה בציבור", "אלמן/ה", "גרוש/ה", "הורה יחידני/ת"] },
-  { key: "liquidSavings", label: "הון נזיל", type: "radio", options: ["עד 100 אלף ₪", "100-200 אלף ₪", "200-300 אלף ₪", "מעל 300 אלף ₪"] },
-  { key: "investmentGoal", label: "מטרת ההשקעה", type: "radio", options: ["הגדלת ההון העצמי דרך עסקת אקזיט", "יצירת הכנסה משכירות"] },
-  { key: "propertyOwnership", label: "בעלות על נכס", type: "radio", options: ["בעל/ת שליש נכס / עסקת אופציה", "בעל/ת נכס ורוצה נוסף", "אין נכס נוסף"] },
-  { key: "employed", label: "מועסק/ת כרגע", type: "radio", options: ["כן", "לא"] },
-  { key: "monthlySavings", label: "חיסכון חודשי", type: "radio", options: ["עד 1,000 ₪", "1,000-3,000 ₪", "3,000-6,000 ₪", "מעל 6,000 ₪"] },
-  { key: "understandConsultation", label: "הבנה: פגישת מומחה", type: "text" },
-  { key: "understandProcess", label: "הבנה: תהליך הליווי", type: "text" },
-  { key: "finalConfirmation", label: "אישור סופי", type: "text" },
+  { key: "landingPage", label: "דף השארת פרטים", type: "text" },
+  { key: "whyTattoo", label: "למה קעקועים", type: "text" },
+  { key: "goals", label: "מה המטרות שלך", type: "text" },
+  { key: "seriousness", label: "כמה רציני/ת (1-10)", type: "number" },
+  { key: "willDoTasks", label: "תבצע/י משימות בין המפגשים", type: "text" },
+  { key: "successVision", label: "איזו תוצאה היא הצלחה מסחררת", type: "text" },
+  { key: "understandsTime", label: "מבין/ה שצריך לפחות 4 שעות בשבוע", type: "text" },
+  { key: "needsPractice", label: "מבין/ה שצריך ליישם כדי לראות תוצאות", type: "text" },
+  { key: "notQuickMoney", label: "מבין/ה שזו לא התעשרות מהירה", type: "text" },
+  { key: "sessionRecordings", label: "מסכים/ה להקלטות המפגשים החיים", type: "text" },
+  { key: "openDay", label: "יום פתוח", type: "text" },
 ];
 
 /** סטטוסי בקשת חיוג מרחוק (דסקטופ → פלאפון). client-safe. */
@@ -184,12 +182,11 @@ export function isDistributionLead(custom?: Record<string, string> | null): bool
   const lp = (c.landingpage || "").trim();
   const slug = `${c.page_slug || ""} ${c.page_url || ""}`;
   return (
-    /VSL2/i.test(lp) ||
-    /חוברת עבודה/.test(lp) ||
-    /הדרכה בלייב/.test(lp) ||
-    /הרשמה לוובינר/.test(lp) ||   // pinuybinuy-live2026 שולח landingpage="הרשמה לוובינר פינוי בינוי"
-    /pinuybinuy/i.test(slug) ||
-    /pinuybinuy/i.test(lp)
+    /שיעור המתנה/.test(lp) ||
+    /מדריך חינמי/.test(lp) ||
+    /וובינר/.test(lp) ||
+    /waitlist/i.test(slug) ||
+    /free/i.test(slug)
   );
 }
 
@@ -204,7 +201,7 @@ export interface Lead {
   stage: LeadStage;
   /** שדות השאלון של הלקוח (formSchema) — כולם אופציונליים */
   answers: Record<string, string>;
-  /** שדות ההסמכה מ-filtertnx */
+  /** שדות ההסמכה משאלון המועמדות */
   quali: Record<string, string>;
   /** שדות מותאמים אישית (מוגדרים בהגדרות) */
   custom: Record<string, string>;
@@ -223,9 +220,9 @@ export interface Lead {
   assignedTo?: string;
   /** אם הומר ללקוח — uid הלקוח */
   convertedClientUid?: string;
-  /** סטטוס בצינור "פגישות מצפן" — קיים רק לאחר סגירת הליד (WON) */
+  /** סטטוס בצינור "פגישות התאמה" — קיים רק לאחר סגירת הליד (WON) */
   compassStatus?: CompassStatus;
-  /** מתי נכנס לצינור פגישות מצפן */
+  /** מתי נכנס לצינור פגישות התאמה */
   compassEnteredAt?: string;
   /** גישה לפורטל הלקוח נפתחה (דגל דביק — טריגר גישה, לא שלב) */
   portalAccess?: boolean;

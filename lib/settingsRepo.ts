@@ -27,10 +27,10 @@ export interface MeetingType {
 const DEFAULT_MEETING_TYPES: MeetingType[] = [
   {
     id: "compass",
-    name: "פגישת מצפן",
-    titleTemplate: "פגישת מצפן תהליך ליווי עסקת אקזיט - פאוור קאפל - עם [שם הלקוח]",
-    durationMin: 60,
-    location: "שדרות הראשונים 23, ראשון לציון, בניין מילניה B קומה 4",
+    name: "פגישת התאמה",
+    titleTemplate: "פגישת התאמה להכשרת הקעקועים - Tattoo Story Academy - עם [שם הלקוח]",
+    durationMin: 45,
+    location: "שיחת זום / טלפון",
   },
 ];
 

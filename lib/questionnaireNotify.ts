@@ -1,7 +1,7 @@
 import { SECTIONS, isFieldVisible, type Answers } from "@/lib/formSchema";
 import { sendMail } from "@/lib/mailer";
 
-const TEAM_TO = ["blog@powercouple.co.il"];
+const TEAM_TO = ["liorrubin3@gmail.com", "itay@binder.co.il"];
 
 export interface Progress {
   total: number;

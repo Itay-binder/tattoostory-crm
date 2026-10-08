@@ -6,9 +6,9 @@ import { sendMail } from "@/lib/mailer";
 
 export const runtime = "nodejs";
 
-// קליטת סליקה מ-CardCom (דרך תרחיש Make "לקוחות פגישת מצפן דרך הוובינר").
+// קליטת סליקה מ-CardCom (דרך תרחיש Make "לקוחות פגישת התאמה דרך הוובינר").
 // מזהה את הליד לפי טלפון/מייל מנורמל → מתעד את הרכישה בכרטיס → מסמן WON והופך ללקוח
-// (נכנס אוטומטית לצינור פגישות מצפן) → שולח מייל התראה ל-blog@powercouple.co.il.
+// (נכנס אוטומטית לצינור פגישות ההתאמה) → שולח מייל התראה לצוות.
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -16,8 +16,8 @@ const CORS = {
   "Access-Control-Allow-Headers": "Content-Type, x-api-key",
 };
 
-const BY = "סליקת CardCom (וובינר מצפן)";
-const NOTIFY_TO = "blog@powercouple.co.il";
+const BY = "סליקת CardCom";
+const NOTIFY_TO = process.env.NOTIFY_EMAIL || "liorrubin3@gmail.com";
 
 export async function OPTIONS() {
   return new NextResponse(null, { status: 204, headers: CORS });
@@ -54,7 +54,7 @@ export async function POST(req: Request) {
   const transactionId = s(body.transactionId) || s(body.dealNumber) || s(body.InternalDealNumber);
   const receiptNumber = s(body.receiptNumber) || s(body.invoiceNumber) || s(body.InvoiceNumber);
   const receiptUrl = s(body.receiptUrl) || s(body.invoiceUrl) || s(body.InvoiceLink);
-  const product = s(body.product) || "פגישת מצפן";
+  const product = s(body.product) || "פגישת התאמה";
 
   const phone = normalizeIsraeliPhone(phoneRaw);
   if (!phone && !email) {
@@ -81,9 +81,9 @@ export async function POST(req: Request) {
   if (receiptUrl) purchaseText += `\n${receiptUrl}`;
   await addLeadActivity(lead.id, { type: "system", source: "api", by: BY, text: purchaseText });
 
-  // 3) סימון WON → לקוח + כניסה אוטומטית לצינור פגישות מצפן (זהה לכפתור "סמן WON").
+  // 3) סימון WON → לקוח + כניסה אוטומטית לצינור פגישות התאמה (זהה לכפתור "סמן WON").
   //    convertLeadToClient אידמפוטנטי — אם כבר לקוח, לא ייווצר כפל.
-  const conv = await convertLeadToClient(lead.id, { email: NOTIFY_TO, name: "סליקה אוטומטית (וובינר מצפן)" });
+  const conv = await convertLeadToClient(lead.id, { email: NOTIFY_TO, name: "סליקה אוטומטית" });
 
   // 4) מייל התראה ל-blog@ שהרוכש קנה.
   const displayName = fullName || lead.fullName || phone || email;
@@ -97,17 +97,17 @@ export async function POST(req: Request) {
     ["מספר קבלה", receiptNumber || "—"],
   ].map(([k, v]) => `<p dir="rtl" style="margin:4px 0"><b>${k}:</b> ${esc(v || "")}</p>`).join("");
   const html = `<div dir="rtl" style="text-align:right;font-family:Arial,sans-serif;font-size:15px;line-height:1.6;color:#1a1a1a">
-    <h2 style="margin:0 0 12px">💳 רכישה חדשה — פגישת מצפן (וובינר)</h2>
+    <h2 style="margin:0 0 12px">💳 רכישה חדשה — פגישת התאמה (וובינר)</h2>
     ${rows}
     ${receiptUrl ? `<p dir="rtl"><a href="${esc(receiptUrl)}">קישור לקבלה/חשבונית</a></p>` : ""}
-    <p dir="rtl" style="color:#666;margin-top:10px">הליד סומן כ-WON והומר ללקוח, ונכנס לצינור פגישות מצפן.${created ? " (נוצר ליד חדש — לא נמצא ליד קיים מתאים)" : ""}</p>
-    <p dir="rtl"><a href="https://powercouple-finance.vercel.app/admin/leads/${lead.id}">פתח את כרטיס הליד ←</a></p>
+    <p dir="rtl" style="color:#666;margin-top:10px">הליד סומן כ-WON והומר ללקוח, ונכנס לצינור פגישות התאמה.${created ? " (נוצר ליד חדש — לא נמצא ליד קיים מתאים)" : ""}</p>
+    <p dir="rtl"><a href="${process.env.BASE_URL || "https://tattoostory-crm.vercel.app"}/admin/leads/${lead.id}">פתח את כרטיס הליד ←</a></p>
   </div>`;
   let mailed = false;
   try {
     mailed = await sendMail({
       to: [NOTIFY_TO],
-      subject: `רכישת פגישת מצפן — ${displayName}${amountText ? ` — ${amountText}` : ""}`,
+      subject: `רכישת פגישת התאמה — ${displayName}${amountText ? ` — ${amountText}` : ""}`,
       html,
     });
   } catch {

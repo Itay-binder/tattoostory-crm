@@ -122,7 +122,7 @@ export default function PortalPage() {
           window.location.href = d.url;
           return;
         }
-        setPayModal({ url: d.url, lowProfileId: d.lowProfileId || "", label: step === "compass" ? "פגישת מצפן · 500 ₪" : "התקדמות לתהליך · 1000 ₪" });
+        setPayModal({ url: d.url, lowProfileId: d.lowProfileId || "", label: step === "compass" ? "פגישת התאמה · 500 ₪" : "התקדמות לתהליך · 1000 ₪" });
       } else alert(d.error || "שגיאה בפתיחת דף התשלום");
     } catch { alert("שגיאה בפתיחת דף התשלום"); } finally { setPayBusy(null); }
   };
@@ -215,9 +215,9 @@ export default function PortalPage() {
   const advanceCTA = (stageKey: string) => {
     if (stageKey === "lead") return (
       <div className="pf-cta">
-        <p>השלב הבא: <b>פגישת מצפן</b> — תכנית אישית עם יועץ הנדל"ן שלנו.</p>
+        <p>השלב הבא: <b>פגישת התאמה</b> — שיחה אישית עם ליאור.</p>
         <div className="pf-actions">
-          <button className="pcf-btn" style={{ padding: "12px 22px", fontSize: 15 }} disabled={payBusy === "compass"} onClick={() => pay("compass")}>{payBusy === "compass" ? "פותח…" : "התקדם לפגישת מצפן · 500 ₪"}</button>
+          <button className="pcf-btn" style={{ padding: "12px 22px", fontSize: 15 }} disabled={payBusy === "compass"} onClick={() => pay("compass")}>{payBusy === "compass" ? "פותח…" : "התקדם לפגישת התאמה · 500 ₪"}</button>
           <Consult />
         </div>
       </div>
@@ -245,9 +245,9 @@ export default function PortalPage() {
         </>);
       case "compass":
         return (<>
-          {c.compass.summary ? <><p><b>סיכום פגישת המצפן:</b></p><p style={{ whiteSpace: "pre-wrap" }}>{c.compass.summary}</p></>
-            : d.isWon ? <p>נכנסת לתהליך פגישת המצפן — ניצור קשר לתיאום.</p>
-            : <p>פגישת מצפן: תכנית אישית עם יועץ, בעלות 500 ₪.</p>}
+          {c.compass.summary ? <><p><b>סיכום פגישת ההתאמה:</b></p><p style={{ whiteSpace: "pre-wrap" }}>{c.compass.summary}</p></>
+            : d.isWon ? <p>נכנסת לתהליך פגישת ההתאמה — ניצור קשר לתיאום.</p>
+            : <p>פגישת התאמה: תכנית אישית עם יועץ, בעלות 500 ₪.</p>}
           {isCurrent && advanceCTA("compass")}
         </>);
       case "process":
@@ -286,7 +286,7 @@ export default function PortalPage() {
     }
   };
 
-  const STAGE_NAMES = ["ליד", "מצפן", "התקדם לתהליך", "בנקאות", "תכנית עסקית", "חתימה", "משכנתא", "ניהול", "מכירה"];
+  const STAGE_NAMES = ["ליד", "פגישת התאמה", "הרשמה", "תשלום", "פתיחת מחזור", "בהכשרה", "הסמכה", "ליווי", "עובדת"];
   const setPv = (n: number | null) => {
     setPreview(n);
     const u = new URL(window.location.href);

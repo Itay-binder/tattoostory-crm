@@ -1,22 +1,22 @@
-// שלבי הלקוח בתהליך (אחרי שהפך ללקוח). client-safe — נטען גם בדפדפן.
+// שלבי הלקוחה בתהליך (אחרי שנסגרה). client-safe — נטען גם בדפדפן.
 
 export const CLIENT_STAGES = [
-  { key: "new", label: "חדש" },
-  { key: "no_compass_scheduled", label: "טרם תואם מצפן" },
-  { key: "no_meeting", label: "טרם ביצעו פגישה" },
-  { key: "no_meeting_no_answer", label: "טרם ביצע פגישה אין מענה" },
-  { key: "not_progressed", label: "טרם התקדמו" },
-  { key: "stuck", label: "לא מתקדם" },
-  { key: "financing", label: "מימון" },
-  { key: "assignment", label: "לשיבוץ" },
-  { key: "signing_scheduled", label: "שובץ לחתימה" },
-  { key: "signed", label: "חתמו דירה" },
-  { key: "signed_more", label: "חתם רוצה עוד 🐰" },
+  { key: "new", label: "חדשה" },
+  { key: "no_compass_scheduled", label: "טרם תואמה פגישת התאמה" },
+  { key: "no_meeting", label: "טרם ביצעה פגישה" },
+  { key: "no_meeting_no_answer", label: "טרם ביצעה פגישה אין מענה" },
+  { key: "not_progressed", label: "טרם התקדמה" },
+  { key: "stuck", label: "לא מתקדמת" },
+  { key: "financing", label: "ממתינה לתשלום" },
+  { key: "assignment", label: "שובצה למחזור" },
+  { key: "signing_scheduled", label: "המחזור נפתח" },
+  { key: "signed", label: "בהכשרה" },
+  { key: "signed_more", label: "סיימה הכשרה 🎓" },
   { key: "retention", label: "לשימור" },
-  { key: "frozen", label: "הקפאה (נעלם באמצע תהליך)" },
+  { key: "frozen", label: "הקפאה (נעלמה באמצע תהליך)" },
   { key: "lost_no_contact", label: "אבוד - לא ליצור קשר" },
   { key: "cancelled", label: "בוטל" },
-  { key: "financial_recovery", label: "הבראה פיננסית" },
+  { key: "financial_recovery", label: "פריסת תשלומים" },
 ] as const;
 
 export type ClientStage = (typeof CLIENT_STAGES)[number]["key"];

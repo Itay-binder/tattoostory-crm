@@ -61,7 +61,7 @@ export async function POST(req: Request) {
     order: typeof s.order === "number" ? s.order : i + 1, optional: !!s.optional, token: token(),
   }));
   if (hasSenderSignature) {
-    signerRecords.push({ index: signerRecords.length, role: "sender", name: "השולח (פאוור קאפל)", contact: "", clientUid: null, order: 99, optional: false, token: token() });
+    signerRecords.push({ index: signerRecords.length, role: "sender", name: "השולח (Tattoo Story)", contact: "", clientUid: null, order: 99, optional: false, token: token() });
   }
 
   const { error: envErr } = await supa().from("contract_envelopes").insert({

@@ -4,7 +4,7 @@
 export interface JourneyInput {
   hasLead: boolean;
   isWon: boolean;              // WON / compass_status≠null / הומר ללקוח
-  compassProgressed: boolean;  // compass_status = 'progressed' (התקדם)
+  compassProgressed: boolean;  // compass_status = 'progressed' (התקדמה)
   questionnairePct: number;    // 0-100
   contractSigned: boolean;     // הסכם התקשרות נחתם
   clientStage?: string | null; // שלב הלקוח (new/financing/assignment/signed/signed_more/...)
@@ -19,32 +19,32 @@ export interface JourneyStage {
 }
 
 export const JOURNEY_STAGES: { key: string; title: string; subtitle: string }[] = [
-  { key: "lead",       title: "שיחת היכרות והבנה",      subtitle: "האם התהליך מתאים עבורך" },
-  { key: "compass",    title: "פגישת מצפן",             subtitle: "תכנית אישית עם יועץ הנדל\"ן" },
-  { key: "process",    title: "התקדמות לתהליך",         subtitle: "שאלון פיננסי + חתימה על הסכם התקשרות" },
-  { key: "banking",    title: "שלב הבנקאות",            subtitle: "וידוא הון עצמי + הוצאות נלוות לעסקה" },
-  { key: "bizplan",    title: "מוכנות לביצוע עסקה",     subtitle: "מעבר על תכנית עסקית" },
-  { key: "signing",    title: "חתימה על הדירה",         subtitle: "רכישת הנכס" },
-  { key: "mortgage",   title: "תשלומים ומשכנתא",        subtitle: "עד לקבלת המפתח" },
-  { key: "manage",     title: "ניהול העסקה",            subtitle: "ליווי שוטף" },
-  { key: "sell",       title: "מכירה ברווח",            subtitle: "לפי התכנית העסקית" },
+  { key: "lead",       title: "שיחת היכרות",            subtitle: "האם ההכשרה מתאימה עבורך" },
+  { key: "compass",    title: "פגישת התאמה",            subtitle: "שיחה אישית עם ליאור" },
+  { key: "process",    title: "הרשמה והסכם",            subtitle: "שאלון מועמדות + חתימה על ההסכם" },
+  { key: "banking",    title: "תשלום והבטחת מקום",      subtitle: "השלמת התשלום ושיבוץ למחזור" },
+  { key: "bizplan",    title: "פתיחת המחזור",           subtitle: "ציוד, חומרים והמפגש הראשון" },
+  { key: "signing",    title: "במהלך ההכשרה",           subtitle: "מפגשים, תרגול ומשימות" },
+  { key: "mortgage",   title: "סיום והסמכה",            subtitle: "תיק עבודות ותעודה" },
+  { key: "manage",     title: "ליווי אחרי ההכשרה",      subtitle: "שיווק עצמי וקבלת לקוחות" },
+  { key: "sell",       title: "עובדת מהמקצוע",          subtitle: "סטודיו או עבודה עצמאית" },
 ];
 
 // מיפוי שלב הלקוח (סקשן לקוחות) → שלב במסע. זו הסמכות ברגע שהלקוח בשלב עסקי.
 // שלבים ללא מיפוי (new/retention/frozen/cancelled) נגזרים מההתקדמות בלבד.
 const CLIENT_STAGE_FLOOR: Record<string, number> = {
-  financing: 3,         // מימון → שלב הבנקאות
-  assignment: 4,        // לשיבוץ → מוכנות לביצוע עסקה
-  signing_scheduled: 5, // שובץ לחתימה → חתימה על הדירה
-  signed: 6,            // חתמו דירה → תשלומים ומשכנתא (החתימה מאחור)
-  signed_more: 6,  // חתם רוצה עוד → לקוח פעיל
+  financing: 3,         // ממתינה לתשלום → תשלום והבטחת מקום
+  assignment: 4,        // שובצה למחזור → פתיחת המחזור
+  signing_scheduled: 5, // המחזור נפתח → במהלך ההכשרה
+  signed: 6,            // בהכשרה → סיום והסמכה
+  signed_more: 7,       // סיימה הכשרה → ליווי אחרי ההכשרה
 };
 
 /** מחזיר את האינדקס הגבוה שהושג (reachedMax). לוקח את המקסימום — לא נסוג אחורה. */
 export function reachedMax(i: JourneyInput): number {
   if (!i.hasLead) return 0;
   let rm = 0;
-  if (i.isWon) rm = 1;                                              // פגישת מצפן
+  if (i.isWon) rm = 1;                                              // פגישת התאמה
   if (i.compassProgressed) rm = Math.max(rm, 2);                    // התקדם לתהליך
   if (i.questionnairePct >= 80 && i.contractSigned) rm = Math.max(rm, 3); // בנקאות
   const floor = CLIENT_STAGE_FLOOR[i.clientStage || ""];           // שלב הלקוח (עוקף התקדמות)

@@ -8,7 +8,7 @@ export const runtime = "nodejs";
  * GET — פילוחי דשבורד נוספים בטווח תאריכי יצירה:
  *   platforms — לפי פלטפורמת הפרסום (Meta / TikTok / YouTube-Google / אחר / ללא ייחוס)
  *   landings  — לפי דף הנחיתה (custom->>'landingpage')
- * כל שורה: { name, cnt, compass } — סה"כ לידים + כמה הגיעו לפגישת מצפן ומעבר.
+ * כל שורה: { name, cnt, compass } — סה"כ לידים + כמה הגיעו לפגישת התאמה ומעבר.
  * פרמטרים: from, to (YYYY-MM-DD, אופציונליים) — זהים ל-/leads/stats.
  */
 export async function GET(req: Request) {

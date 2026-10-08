@@ -77,7 +77,7 @@ export default function PerformancePage() {
   );
 
   if (!authReady) return <main className="pcf-wrap pcf-wide"><div className="pcf-spin" style={{ margin: "60px auto" }} /></main>;
-  if (!user) return <main className="pcf-wrap pcf-wide"><header className="pcf-hero"><span className="pcf-badge">ניהול • פאוור קאפל</span><h1>כניסת מנהלים</h1></header><div className="pcf-card pcf-login"><button className="pcf-btn white" onClick={login}>התחברות עם Google</button></div></main>;
+  if (!user) return <main className="pcf-wrap pcf-wide"><header className="pcf-hero"><span className="pcf-badge">ניהול • Tattoo Story</span><h1>כניסת מנהלים</h1></header><div className="pcf-card pcf-login"><button className="pcf-btn white" onClick={login}>התחברות עם Google</button></div></main>;
   if (denied) return <main className="pcf-wrap pcf-wide"><AdminNav /><div className="pcf-card" style={{ textAlign: "center" }}><p>החשבון <b>{user.email}</b> אינו מורשה.</p></div></main>;
 
   const m = data?.meta;
@@ -86,7 +86,7 @@ export default function PerformancePage() {
       <AdminNav />
       <div className="pcf-admin-top">
         <div>
-          <span className="pcf-badge">ניהול • פאוור קאפל</span>
+          <span className="pcf-badge">ניהול • Tattoo Story</span>
           <h1 style={{ fontSize: 28, margin: "12px 0 0" }}>📈 ביצועים</h1>
           <p style={{ color: "var(--muted)", margin: "6px 0 0", fontSize: 14 }}>לידים ותקציב פרסום — נתונים אמיתיים (אופטיוואן + המערכת), ללא מיזוגי גיליון.</p>
         </div>

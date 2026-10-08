@@ -4,7 +4,7 @@ import { listCompassMeetings } from "@/lib/leadsRepo";
 
 export const runtime = "nodejs";
 
-// GET — כל הלידים בצינור "פגישות מצפן"
+// GET — כל הלידים בצינור "פגישות התאמה"
 export async function GET(req: Request) {
   const admin = await verifyAdmin(req);
   if (!admin) return NextResponse.json({ error: "unauthorized" }, { status: 403 });

@@ -6,7 +6,7 @@ import { runMeetingReminders } from "@/lib/meetingReminders";
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
-// סוכן רגב — תזכורות פגישות. מופעל ע"י Vercel Cron (Bearer CRON_SECRET) כל בוקר,
+// תזכורות פגישות. מופעל ע"י Vercel Cron (Bearer CRON_SECRET) כל בוקר,
 // או ידנית ע"י אדמין. ?mode=dry לבדיקה בלי שליחה.
 export async function GET(req: Request) {
   const secret = env("CRON_SECRET");

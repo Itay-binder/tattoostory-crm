@@ -149,7 +149,7 @@ export default function SettingsPage() {
     <main className="pcf-wrap">
       <AdminNav />
       <div className="pcf-admin-top">
-        <div><span className="pcf-badge">ניהול • פאוור קאפל</span><h1 style={{ fontSize: 28, margin: "12px 0 0" }}>הגדרות מערכת</h1></div>
+        <div><span className="pcf-badge">ניהול • Tattoo Story</span><h1 style={{ fontSize: 28, margin: "12px 0 0" }}>הגדרות מערכת</h1></div>
       </div>
       {err && <div className="pcf-err">{err}</div>}
       {msg && <div className={msg.includes("✓") ? "pcf-ok" : "pcf-err"}>{msg}</div>}
@@ -254,7 +254,7 @@ export default function SettingsPage() {
             )}
             <div className="pcf-form" style={{ marginTop: 12 }}>
               <div className="pcf-field full"><label>משתמש היומן (חשבון Workspace — ריק = ברירת המחדל)</label>
-                <input dir="ltr" style={{ textAlign: "right" }} value={calUser} onChange={(e) => setCalUser(e.target.value)} placeholder="office@powercouple.co.il" />
+                <input dir="ltr" style={{ textAlign: "right" }} value={calUser} onChange={(e) => setCalUser(e.target.value)} placeholder="liorrubin3@gmail.com" />
               </div>
             </div>
             <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap", marginTop: 8 }}>
@@ -270,7 +270,7 @@ export default function SettingsPage() {
               )}
               {calMsg && <span className={calMsg.includes("✓") ? "pcf-ok" : "pcf-err"} style={{ marginTop: 0, padding: "8px 14px" }}>{calMsg}</span>}
             </div>
-            <p style={{ fontSize: 12, color: "var(--muted)", marginBottom: 0 }}>יומן זה משמש ל<b>פגישות מצפן</b> (נקבעות תמיד ביומן של רגב).</p>
+            <p style={{ fontSize: 12, color: "var(--muted)", marginBottom: 0 }}>יומן זה משמש ל<b>פגישות התאמה</b> (נקבעות תמיד ביומן הראשי).</p>
           </div>
 
           {/* יומני נציגים — לפולואפים */}
@@ -311,7 +311,7 @@ export default function SettingsPage() {
                 );
               })}
             </div>
-            <p style={{ fontSize: 12, color: "var(--muted)", marginTop: 12, marginBottom: 0 }}>נציגי @powercouple.co.il מתחברים אוטומטית (הרשאת דומיין). למייל בדומיין אחר (כמו binder.co.il) ייתכן שיידרש אישור נפרד.</p>
+            <p style={{ fontSize: 12, color: "var(--muted)", marginTop: 12, marginBottom: 0 }}>הנציגים מתחברים עם חשבון הגוגל שלהם. מייל שאינו ברשימת האדמינים לא יקבל גישה.</p>
           </div>
         </>
       )}

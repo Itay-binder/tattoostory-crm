@@ -496,7 +496,10 @@ export async function upsertLead(intake: LeadIntake, meta: { source: string; by:
   return { lead: (await getLead(id))!, merged: false };
 }
 
-export async function updateLeadFields(id: string, patch: Partial<LeadIntake> & { stage?: LeadStage }): Promise<Lead | null> {
+export async function updateLeadFields(
+  id: string,
+  patch: Partial<LeadIntake> & { stage?: LeadStage; clearCustom?: string[] },
+): Promise<Lead | null> {
   const existing = await getLead(id);
   if (!existing) return null;
   const upd: Record<string, unknown> = { updated_at: nowIso() };
@@ -511,7 +514,12 @@ export async function updateLeadFields(id: string, patch: Partial<LeadIntake> & 
   if (patch.stage !== undefined) upd.stage = patch.stage;
   if (patch.answers) upd.answers = { ...existing.answers, ...cleanObj(patch.answers) };
   if (patch.quali) upd.quali = { ...existing.quali, ...cleanObj(patch.quali) };
-  if (patch.custom) upd.custom = { ...existing.custom, ...cleanObj(patch.custom) };
+  if (patch.custom || patch.clearCustom?.length) {
+    // cleanObj מסנן ערכים ריקים, לכן מחיקת שדה נעשית דרך clearCustom
+    const next = { ...existing.custom, ...cleanObj(patch.custom) };
+    for (const k of patch.clearCustom || []) delete next[k];
+    upd.custom = next;
+  }
   const { error } = await supa().from("leads").update(upd).eq("id", id);
   if (error) throw new Error(error.message);
   return getLead(id);

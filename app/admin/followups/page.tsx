@@ -185,7 +185,9 @@ export default function FollowupsPage() {
       const res = await fetch(`/api/admin/leads/${lead.id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${t}` },
-        body: JSON.stringify({ action: "update", custom: { followup_at: iso } }),
+        body: iso
+          ? JSON.stringify({ action: "update", custom: { followup_at: iso } })
+          : JSON.stringify({ action: "update", clearCustom: ["followup_at"] }),
       });
       if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || "update failed");
       setLeads((prev) => prev.map((l) => (l.id === lead.id

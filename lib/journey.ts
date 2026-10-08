@@ -7,7 +7,7 @@ export interface JourneyInput {
   compassProgressed: boolean;  // compass_status = 'progressed' (התקדמה)
   questionnairePct: number;    // 0-100
   contractSigned: boolean;     // הסכם התקשרות נחתם
-  clientStage?: string | null; // שלב הלקוח (new/financing/assignment/signed/signed_more/...)
+  clientStage?: string | null; // שלב הלקוחה (new/financing/assignment/signed/signed_more/...)
 }
 
 export interface JourneyStage {

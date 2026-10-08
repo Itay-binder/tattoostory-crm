@@ -45,7 +45,7 @@ export default function CompassPage() {
     setLoading(true); setErr(null); setDenied(false);
     try {
       const t = await firebaseAuth().currentUser!.getIdToken();
-      const res = await fetch("/api/admin/compass", { headers: { Authorization: `Bearer ${t}` } });
+      const res = await fetch("/api/admin/matching", { headers: { Authorization: `Bearer ${t}` } });
       if (res.status === 403) { setDenied(true); return; }
       if (!res.ok) throw new Error();
       setMeetings((await res.json()).meetings || []);

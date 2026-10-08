@@ -6,7 +6,7 @@ export const DB_SCHEMA = `
 כל התאריכים ב-UTC (timestamptz). אזור הזמן העסקי הוא Asia/Jerusalem —
 בשאילתות על תאריכים השתמש ב-(col AT TIME ZONE 'Asia/Jerusalem').
 
-TABLE leads  -- לידים (3,000+)
+TABLE leads  -- לידים
   id uuid, first_name text, last_name text, full_name text,
   email text, phone text (מנורמל: 972XXXXXXXXX),
   id_number text,
@@ -48,17 +48,6 @@ TABLE client_files  -- קבצים שהעלה לקוח
 
 TABLE admin_notes  -- הערות פנימיות על לקוח
   id uuid, client_id uuid -> clients.id, text text, author_name text, created_at timestamptz
-
-TABLE deals  -- עסקאות (נשאר מהשלד, לא בשימוש אצל Tattoo Story)
-  id uuid, title text, status text, data jsonb (city, dealType, price, expectedProfit),
-  created_at timestamptz, updated_at timestamptz
-
-TABLE deal_clients  -- שיבוץ לקוחות לעסקה
-  deal_id uuid -> deals.id, client_id uuid -> clients.id, added_at timestamptz
-
-TABLE deal_payments  -- לוח תשלומים של עסקה
-  id uuid, deal_id uuid -> deals.id, title text, amount numeric, due_date date,
-  status text (pending/paid/canceled), paid_at timestamptz
 
 TABLE contract_envelopes  -- הסכמים
   id uuid, primary_client_id uuid -> clients.id, status text, created_at timestamptz

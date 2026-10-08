@@ -48,10 +48,3 @@ export const CLIENT_STAGE_KIND: Record<string, string> = {
 // קצב הלקוח — כמה מהר הוא מתקדם בתהליך. נבחר מכרטיס הלקוח, עם תאריך עדכון אחרון.
 export const CLIENT_PACES = ["איטי", "זריז", "מהיר מאוד"] as const;
 export type ClientPace = (typeof CLIENT_PACES)[number];
-
-// שלבים שאינם זמינים לשיבוץ לעסקה: חתמו דירה, הקפאה, בוטל.
-// "חתם רוצה עוד" כן זמין (לקוח חוזר), וכל היתר (חדש/מימון/לשיבוץ/לשימור) זמינים.
-export const DEAL_UNASSIGNABLE_STAGES = ["signed", "frozen", "cancelled", "lost_no_contact"];
-export function isAssignableToDeal(stage: string): boolean {
-  return !DEAL_UNASSIGNABLE_STAGES.includes(stage);
-}

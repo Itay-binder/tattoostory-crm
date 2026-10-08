@@ -6,14 +6,12 @@ import { usePathname } from "next/navigation";
 import { onAuthStateChanged, firebaseAuth } from "@/lib/authClient";
 import ThemeToggle from "./ThemeToggle";
 
-const OTHER_PREFIXES = ["/admin/leads", "/admin/compass", "/admin/deals", "/admin/financing", "/admin/dashboard", "/admin/performance", "/admin/settings", "/admin/templates", "/admin/manychat", "/admin/whatsapp"];
+const OTHER_PREFIXES = ["/admin/leads", "/admin/matching", "/admin/dashboard", "/admin/performance", "/admin/settings", "/admin/templates", "/admin/manychat", "/admin/whatsapp"];
 const TABS = [
   { href: "/admin/dashboard", label: "דשבורד", icon: "📊", countKey: "", match: (p: string) => p.startsWith("/admin/dashboard") },
   { href: "/admin/leads", label: "לידים", icon: "🎯", countKey: "leads", match: (p: string) => p.startsWith("/admin/leads") },
-  { href: "/admin/compass", label: "פגישות התאמה", icon: "🧭", countKey: "compass", match: (p: string) => p.startsWith("/admin/compass") },
+  { href: "/admin/matching", label: "פגישות התאמה", icon: "🧭", countKey: "matching", match: (p: string) => p.startsWith("/admin/matching") },
   { href: "/admin", label: "לקוחות", icon: "👥", countKey: "clients", match: (p: string) => p === "/admin" || (p.startsWith("/admin/") && !OTHER_PREFIXES.some((pre) => p.startsWith(pre))) },
-  { href: "/admin/financing", label: "מימון", icon: "💰", countKey: "financing", match: (p: string) => p.startsWith("/admin/financing") },
-  { href: "/admin/deals", label: "עסקאות", icon: "🏘️", countKey: "deals", match: (p: string) => p.startsWith("/admin/deals") },
   { href: "/admin/manychat", label: "מאניצ'אט", icon: "💬", countKey: "", match: (p: string) => p.startsWith("/admin/manychat") },
   { href: "/admin/whatsapp", label: "ווצאפ", icon: "🟢", countKey: "", match: (p: string) => p.startsWith("/admin/whatsapp") },
   { href: "/admin/settings", label: "הגדרות", icon: "⚙️", countKey: "", match: (p: string) => p.startsWith("/admin/settings") },
@@ -21,7 +19,7 @@ const TABS = [
 
 export default function AdminNav() {
   const pathname = usePathname() || "/admin";
-  const [counts, setCounts] = useState<{ leads?: number; clients?: number; compass?: number }>({});
+  const [counts, setCounts] = useState<{ leads?: number; clients?: number; matching?: number }>({});
 
   useEffect(() => {
     const unsub = onAuthStateChanged(firebaseAuth(), async (u) => {

@@ -13,7 +13,7 @@ CRM מלא לניהול לידים, מועמדות ולקוחות של האקד�
 - **Vercel:** team `liftygo` (`team_E7HXhz1GLkBowkDqgelE4xaB`), project `prj_kef6DcHHvecvkuGgTddVF9L840oM`
 - **Supabase:** project `crsozdimrplcmngmzkcl` (חשבון liorrubin3@gmail.com), אזור eu-central-1
 - **מקור הפורט:** `C:\Users\itay\עסק איתי\PowerCouple - דין ומיק\finance-form`
-- **פריסה:** `git push` → Vercel auto-deploy
+- **פריסה:** `vercel deploy --prod --yes` **ידנית** — חיבור הגיטהאב בפרויקט הזה לא מפעיל פריסות (ראה גוצ'ות)
 
 ## Stack
 
@@ -31,17 +31,19 @@ Next.js 15 (App Router) · TypeScript · Supabase (Postgres + Auth + Storage) ·
 ## מסכים
 
 ```
-דשבורד | לידים | פגישות התאמה | לקוחות | מימון | עסקאות | מאניצ'אט | ווצאפ | הגדרות
+דשבורד | לידים | פגישות התאמה | לקוחות | מאניצ'אט | ווצאפ | הגדרות
 ```
 
 - `/admin` — **לקוחות** (מי שנסגרה). `/admin/[uid]` — כרטיס לקוחה.
 - `/admin/leads` + `/admin/leads/[id]` — לידים וכרטיס ליד (יומן פעילות, שיוך נציגה, קביעת פגישה, ווצאפ).
-- `/admin/compass` — צינור **פגישות התאמה**. ליד נכנס לכאן אוטומטית ברגע שנסגר (WON).
+- `/admin/matching` — צינור **פגישות התאמה**. ליד נכנס לכאן אוטומטית ברגע שנסגר (WON).
 - `/admin/dashboard` — משפך, פילוחים לפי פלטפורמה / דף נחיתה / מודעה, נתוני מטא, עוזר נתונים (DataChat).
 - `/admin/whatsapp` — אינבוקס GreenAPI (תוספת של ליאור, לא קיים ב-finance-form).
 - `/admin/templates` — תבניות חוזה + שליחה לחתימה. `/sign/[token]` — דף החתימה הציבורי.
 - `/` — שאלון המועמדות הציבורי. `/portal` — פורטל הלקוחה (מסע 9 שלבים).
-- `/admin/financing`, `/admin/deals` — נשארו מהשלד (עולם הנדל"ן של פאוור קאפל). לא בשימוש אצל ליאור.
+- **סקשני מימון ועסקאות הוסרו** (08/10/2026, בקשת איתי) — היו עולם הנדל"ן של פאוור קאפל.
+  נמחקו הדפים, הראוטים, `lib/deals*`, `lib/financing*` ו-cron תזכורות התשלום.
+  הטבלאות `deals`, `deal_*`, `financing_*` נשארו בדאטהבייס ריקות ולא מזיקות.
 
 ## מודל הנתונים — מה חשוב לדעת
 
@@ -49,7 +51,7 @@ Next.js 15 (App Router) · TypeScript · Supabase (Postgres + Auth + Storage) ·
   רק התוויות בשפה של ליאור** — כך כל הקוד, הפונקציות ב-SQL והדשבורד ממשיכים לעבוד:
   `new`=ליד חדש · `contacted`=שיחה 1 יצאה · `no_answer_1/2/3`=שתיים/שלוש/4 שיחות יצאו ·
   `followup`=פולואפ עתידי · `watching`=נשלחה הודעה · `relevant`=מתעניינת ·
-  `meeting_scheduled`=נקבעה שיחה · `compass`=הגיעה לפגישת התאמה · `in_process`=בטיפול ·
+  `meeting_scheduled`=נקבעה שיחה · `compass`=הגיעה לפגישת התאמה (המפתח והעמודה `compass_status` נשארו — רק המסלול והתווית שונו) · `in_process`=בטיפול ·
   `won`=נסגר (לקוחה) · `lost`=לא רלוונטי · `dormant`=ליד רדום.
   אותו עקרון ב-`CLIENT_STAGES` (`lib/clients.ts`) וב-`JOURNEY_STAGES` (`lib/journey.ts`).
 - **`leads.quali`** — שדות שאלון המועמדות (`QUALI_FIELDS`): source, gender, age, whyTattoo,
@@ -100,7 +102,11 @@ node scripts/apply-migrations.mjs   # מריץ לפי סדר שם הקובץ, מ
 
 ## גוצ'ות
 
-- `vercel.json` מגדיר 4 crons. כל ראוט cron דורש `Bearer CRON_SECRET`.
+- ⚠️ **ה-GitHub integration לא מפעיל פריסות בפרויקט הזה.** `git push` לא מספיק —
+  חייב `vercel deploy --prod --yes`. (בגלל זה הפרודקשן היה תקוע 3 שבועות על קומיט ישן.)
+- ⚠️ **ה-Supabase בחינם ונכנס ל-INACTIVE אחרי חוסר שימוש.** אם ה-DNS לא נפתר — זו הסיבה.
+  restore: `POST https://api.supabase.com/v1/projects/{ref}/restore` עם ה-PAT.
+- `vercel.json` מגדיר 3 crons (תזכורות חתימה + שתי תזכורות פגישות). כל ראוט cron דורש `Bearer CRON_SECRET`.
 - קליטת לידים (`/api/leads/intake`) חוסמת בקשות דפדפן שלא מ-`tattoostoryacademy.com`
   (או `*.vercel.app`). בקשות שרת-לשרת (Make/PHP) עוברות עם מפתח ה-API מטבלת `settings`.
 - `.github/workflows/regev-meeting-reminders.yml` הוא שארית מפאוור קאפל. בלי secrets הוא נכשל — למחוק או להשתיק.

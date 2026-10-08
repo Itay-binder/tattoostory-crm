@@ -7,7 +7,6 @@ import { findLeadForClient, getLead } from "@/lib/leadsRepo";
 import { computeProgress } from "@/lib/questionnaireNotify";
 import { buildJourney, stagesFromReached, type JourneyInput } from "@/lib/journey";
 import { normalizeEmail } from "@/lib/leads";
-import { signedReadUrl } from "@/lib/storage";
 
 export const runtime = "nodejs";
 
@@ -94,35 +93,12 @@ export async function GET(req: Request) {
   }
 
   // ── עסקה + תשלומי משכנתא + תכנית עסקית (שלבים 5-8, read-side) ──
-  let payments: { dueDate: string; amount: number; status: string; note: string }[] = [];
-  let businessPlan: string | null = null;
-  let bizPlanFileUrl: string | null = null;
-  let bizPlanFileName: string | null = null;
-  if (client) {
-    // עסקה של הלקוח — כלקוח ראשי (linked_client_id) או דרך שיבוץ (deal_clients)
-    const sel = "id,business_plan,business_plan_file,business_plan_file_name";
-    type DealRow = { id: string; business_plan: string | null; business_plan_file: string | null; business_plan_file_name: string | null };
-    let deal: DealRow | undefined;
-    const { data: primary } = await supa().from("deals").select(sel).eq("linked_client_id", client.id).order("updated_at", { ascending: false }).limit(1);
-    deal = (primary as DealRow[])?.[0];
-    if (!deal) {
-      const { data: dc } = await supa().from("deal_clients").select("deal_id").eq("client_id", client.id).limit(1);
-      const dealId = (dc as { deal_id: string }[])?.[0]?.deal_id;
-      if (dealId) {
-        const { data: d2 } = await supa().from("deals").select(sel).eq("id", dealId).limit(1);
-        deal = (d2 as DealRow[])?.[0];
-      }
-    }
-    if (deal) {
-      businessPlan = deal.business_plan || null;
-      if (deal.business_plan_file) {
-        try { bizPlanFileUrl = await signedReadUrl(deal.business_plan_file, 3600); bizPlanFileName = deal.business_plan_file_name || "תכנית עסקית.pdf"; } catch { /* */ }
-      }
-      const { data: pays } = await supa().from("deal_payments").select("due_date,amount,status,note").eq("deal_id", deal.id).order("due_date", { ascending: true });
-      payments = ((pays as { due_date: string; amount: number; status: string; note: string | null }[]) || [])
-        .map((p) => ({ dueDate: p.due_date, amount: Number(p.amount) || 0, status: p.status, note: p.note || "" }));
-    }
-  }
+  // סקשני העסקה (תכנית עסקית / לוח תשלומים) הוסרו יחד עם סקשן העסקאות.
+  // המשתנים נשמרים כדי שמבנה התשובה לפורטל לא ישתנה — הם פשוט תמיד ריקים.
+  const payments: { dueDate: string; amount: number; status: string; note: string }[] = [];
+  const businessPlan: string | null = null;
+  const bizPlanFileUrl: string | null = null;
+  const bizPlanFileName: string | null = null;
 
   const isWon = !!(lead?.compassStatus || lead?.stage === "won" || lead?.convertedClientUid || client);
   const compassProgressed = compassStatus === "progressed";

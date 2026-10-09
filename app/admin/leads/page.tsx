@@ -46,7 +46,16 @@ const CORE_COLUMNS: Column[] = [
   { key: "lastLeadAt", label: "קליטה אחרונה", get: (l) => l.lastLeadAt, isDate: true, kind: "meta" },
   { key: "custom.landingpage", label: "דף נחיתה", get: (l) => l.custom?.landingpage || "", kind: "custom" },
 ];
-const DEFAULT_VISIBLE = ["fullName", "whatsapp", "phone", "email", "quali.source", "stage", "updatedAt"];
+// סדר העמודות שאיתי קבע (10/2026) — ברירת המחדל לכל המשתמשים.
+const DEFAULT_VISIBLE = [
+  "fullName", "whatsapp", "phone", "email", "assignedTo", "stage",
+  "createdAt", "updatedAt", "lastLeadAt",
+  "utm.utm_campaign", "utm.utm_content", "utm.utm_medium", "utm.utm_source",
+  "custom.landingpage",
+];
+// כשמשנים את ברירת המחדל מעלים את הגרסה — כל מי שיש לו סידור שמור בדפדפן
+// מקבל את הסידור החדש פעם אחת, ומשם יכול להתאים לעצמו כרגיל.
+const COLS_VERSION = "2026-10-09";
 
 export default function LeadsPage() {
   const [user, setUser] = useState<User | null>(null);
@@ -85,7 +94,14 @@ export default function LeadsPage() {
   // תחזיר לאותו מקום. עמוד/טאבים/פילטרים ב-sessionStorage (זמני לטאב), עמודות/מיון ב-localStorage (קבוע).
   useEffect(() => {
     try {
-      const v = localStorage.getItem("leadsVisible"); if (v) setVisible(JSON.parse(v));
+      if (localStorage.getItem("leadsColsVer") !== COLS_VERSION) {
+        // ברירת מחדל חדשה — דורסים סידור ישן פעם אחת בלבד
+        localStorage.setItem("leadsColsVer", COLS_VERSION);
+        localStorage.setItem("leadsVisible", JSON.stringify(DEFAULT_VISIBLE));
+        setVisible(DEFAULT_VISIBLE);
+      } else {
+        const v = localStorage.getItem("leadsVisible"); if (v) setVisible(JSON.parse(v));
+      }
       const s = localStorage.getItem("leadsSort"); if (s) { const p = JSON.parse(s); setSortKey(p.key); setSortDir(p.dir); }
       const pg = sessionStorage.getItem("leadsPage"); if (pg) setPage(Math.max(1, parseInt(pg, 10) || 1));
       const st = sessionStorage.getItem("leadsStageTabs"); if (st) setStageTabs(JSON.parse(st));

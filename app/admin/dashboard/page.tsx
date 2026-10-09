@@ -61,6 +61,8 @@ function rangeOf(preset: Preset): { from: string; to: string } {
   }
 }
 const ils = (n: number) => `₪${Math.round(n).toLocaleString("he-IL")}`;
+/** סכום קטן (עלות לקליק/לליד) — באגורות, אחרת ₪1.4 מוצג כ-₪1 */
+const ilsFine = (n: number) => `₪${n.toLocaleString("he-IL", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const int = (n: number) => Math.round(n).toLocaleString("he-IL");
 const dec = (n: number, d = 2) => n.toLocaleString("he-IL", { minimumFractionDigits: d, maximumFractionDigits: d });
 
@@ -279,7 +281,7 @@ export default function DashboardPage() {
               <div className="pcf-stat"><div className="num">{int(meta.reach)}</div><div className="lbl">תפוצה</div></div>
               <div className="pcf-stat"><div className="num">{int(meta.linkClicks)}</div><div className="lbl">קליקים על קישור</div></div>
               <div className="pcf-stat"><div className="num">{dec(meta.ctr, 2)}%</div><div className="lbl">CTR</div></div>
-              <div className="pcf-stat"><div className="num">{ils(meta.cpc)}</div><div className="lbl">עלות לקליק</div></div>
+              <div className="pcf-stat"><div className="num">{ilsFine(meta.cpc)}</div><div className="lbl">עלות לקליק</div></div>
               <div className="pcf-stat">
                 <div className="num">{int(meta.leads)}</div>
                 <div className="lbl">לידים ממטא
@@ -313,7 +315,7 @@ export default function DashboardPage() {
                         <td>{int(c.reach)}</td>
                         <td>{int(c.linkClicks)}</td>
                         <td style={{ whiteSpace: "nowrap" }}>{dec(c.ctr, 2)}%</td>
-                        <td style={{ whiteSpace: "nowrap" }}>{ils(c.cpc)}</td>
+                        <td style={{ whiteSpace: "nowrap" }}>{ilsFine(c.cpc)}</td>
                         <td>{c.leads ? <b>{int(c.leads)}</b> : "—"}</td>
                         <td style={{ whiteSpace: "nowrap" }}>{c.leads ? ils(c.costPerLead) : "—"}</td>
                       </tr>

@@ -222,6 +222,28 @@ function applyFilters(qb: Qb, filters: Record<string, string>): Qb {
   return qb;
 }
 
+export interface FunnelStats {
+  intakes: number;            // קליטות (ליד קיים שנקלט מחדש נספר שוב)
+  uniqueLeads: number;        // אנשים ייחודיים מאחורי הקליטות
+  callsMade: number;          // לידים שיש עליהם עדות לשיחה בטווח
+  meetingsScheduled: number;  // נכנסו לצינור פגישות ההתאמה בטווח
+  meetingsHeld: number;       // הפגישה התקיימה בפועל
+  clientsWon: number;         // לקוחות שנסגרו בטווח
+}
+
+/** מוני המשפך לדשבורד (פונקציית funnel_stats ב-Postgres). */
+export async function funnelStats(from?: string, to?: string): Promise<FunnelStats> {
+  const { data, error } = await supa().rpc("funnel_stats", { p_from: from ?? null, p_to: to ?? null });
+  if (error) throw new Error(error.message);
+  const r = (Array.isArray(data) ? data[0] : data) as Record<string, string> | undefined;
+  const n = (v: unknown) => Number(v || 0);
+  return {
+    intakes: n(r?.intakes), uniqueLeads: n(r?.unique_leads), callsMade: n(r?.calls_made),
+    meetingsScheduled: n(r?.meetings_scheduled), meetingsHeld: n(r?.meetings_held),
+    clientsWon: n(r?.clients_won),
+  };
+}
+
 export interface LastNote { text: string; by: string; at: string; type: string }
 
 /**

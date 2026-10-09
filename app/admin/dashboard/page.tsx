@@ -10,6 +10,59 @@ import DataChat from "./DataChat";
 interface StatRow { source: string; stage: string; cnt: number }
 /** שורת פילוח (פלטפורמה / דף נחיתה) מ-/api/admin/leads/breakdowns */
 interface BreakRow { name: string; cnt: number; compass: number }
+/** מוני המשפך מ-/api/admin/funnel */
+interface Funnel {
+  intakes: number; uniqueLeads: number; callsMade: number;
+  meetingsScheduled: number; meetingsHeld: number; clientsWon: number;
+}
+/** קמפיין מחשבון המודעות, מ-/api/admin/meta */
+interface MetaCampaign {
+  id: string; name: string; objective: string; status: string; statusLabel: string;
+  spend: number; impressions: number; reach: number; frequency: number;
+  clicks: number; linkClicks: number; ctr: number; cpc: number; cpm: number;
+  leads: number; costPerLead: number; landingPageViews: number;
+}
+interface MetaData {
+  account: string; currency: string; spend: number; impressions: number; reach: number;
+  clicks: number; linkClicks: number; ctr: number; cpc: number; leads: number;
+  costPerLead: number; campaigns: MetaCampaign[];
+}
+
+// ── טווחי זמן מוכנים ──
+type Preset = "today" | "yesterday" | "week" | "month" | "last30" | "custom" | "all";
+const PRESETS: { key: Preset; label: string }[] = [
+  { key: "today", label: "היום" },
+  { key: "yesterday", label: "אתמול" },
+  { key: "week", label: "השבוע" },
+  { key: "month", label: "החודש" },
+  { key: "last30", label: "30 ימים אחרונים" },
+  { key: "custom", label: "מותאם אישית" },
+  { key: "all", label: "הכל" },
+];
+/** YYYY-MM-DD בשעון המקומי (ישראל) — לא UTC, כדי ש"היום" יהיה היום. */
+const ymd = (d: Date) => {
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+};
+const shift = (days: number) => { const d = new Date(); d.setDate(d.getDate() + days); return d; };
+/** טווח התאריכים לכל פריסט. custom/all מוחזרים ריקים ומנוהלים בנפרד. */
+function rangeOf(preset: Preset): { from: string; to: string } {
+  const now = new Date();
+  switch (preset) {
+    case "today": return { from: ymd(now), to: ymd(now) };
+    case "yesterday": { const y = ymd(shift(-1)); return { from: y, to: y }; }
+    case "week": { // שבוע שמתחיל בראשון, כמו בישראל
+      const start = new Date(now); start.setDate(now.getDate() - now.getDay());
+      return { from: ymd(start), to: ymd(now) };
+    }
+    case "month": { const start = new Date(now.getFullYear(), now.getMonth(), 1); return { from: ymd(start), to: ymd(now) }; }
+    case "last30": return { from: ymd(shift(-29)), to: ymd(now) };
+    default: return { from: "", to: "" };
+  }
+}
+const ils = (n: number) => `₪${Math.round(n).toLocaleString("he-IL")}`;
+const int = (n: number) => Math.round(n).toLocaleString("he-IL");
+const dec = (n: number, d = 2) => n.toLocaleString("he-IL", { minimumFractionDigits: d, maximumFractionDigits: d });
 
 // צבע/אימוג'י לכל פלטפורמה — עוזר לזהות מבט מהיר.
 const PLATFORM_META: Record<string, { icon: string; color: string }> = {
@@ -46,8 +99,23 @@ export default function DashboardPage() {
   const [ads, setAds] = useState<BreakRow[]>([]);
   const [totalLeads, setTotalLeads] = useState(0);
   const [err, setErr] = useState<string | null>(null);
-  const [from, setFrom] = useState("");
-  const [to, setTo] = useState("");
+  // ברירת המחדל: החודש הנוכחי
+  const [preset, setPreset] = useState<Preset>("month");
+  const [from, setFrom] = useState(rangeOf("month").from);
+  const [to, setTo] = useState(rangeOf("month").to);
+  const [funnel, setFunnel] = useState<Funnel | null>(null);
+  const [meta, setMeta] = useState<MetaData | null>(null);
+  const [metaReason, setMetaReason] = useState<string | null>(null);
+  const [metaLoading, setMetaLoading] = useState(false);
+
+  /** בחירת טווח מוכן — custom משאיר את השדות למשתמש, all מנקה אותם. */
+  const pickPreset = (k: Preset) => {
+    setPreset(k);
+    if (k === "all") { setFrom(""); setTo(""); return; }
+    if (k === "custom") return;
+    const r = rangeOf(k);
+    setFrom(r.from); setTo(r.to);
+  };
 
   useEffect(() => onAuthStateChanged(firebaseAuth(), (u) => { setUser(u); setAuthReady(true); }), []);
 
@@ -61,9 +129,10 @@ export default function DashboardPage() {
       if (f) p.set("from", f);
       if (t2) p.set("to", t2);
       const auth = { headers: { Authorization: `Bearer ${t}` } };
-      const [res, resB] = await Promise.all([
+      const [res, resB, resF] = await Promise.all([
         fetch(`/api/admin/leads/stats?${p}`, auth),
         fetch(`/api/admin/leads/breakdowns?${p}`, auth),
+        fetch(`/api/admin/funnel?${p}`, auth),
       ]);
       if (res.status === 403) { setDenied(true); return; }
       if (!res.ok) throw new Error();
@@ -71,9 +140,28 @@ export default function DashboardPage() {
       setStats(d.stats || []);
       setTotalLeads(d.total || 0);
       if (resB.ok) { const b = await resB.json(); setPlatforms(b.platforms || []); setLandings(b.landings || []); setAds(b.ads || []); }
+      setFunnel(resF.ok ? (await resF.json()).funnel : null);
     } catch { setErr("שגיאה בטעינת הנתונים"); } finally { setLoading(false); }
   }, []);
   useEffect(() => { if (user) load(from, to); }, [user, from, to, load]);
+
+  // נתוני המודעות נטענים בנפרד — הקריאה ל-Graph API איטית ולא צריכה לעכב את הדשבורד
+  const loadMeta = useCallback(async (f: string, t2: string) => {
+    setMetaLoading(true); setMetaReason(null);
+    try {
+      const t = await firebaseAuth().currentUser!.getIdToken();
+      const p = new URLSearchParams();
+      if (f) p.set("from", f);
+      if (t2) p.set("to", t2);
+      const res = await fetch(`/api/admin/meta?${p}`, { headers: { Authorization: `Bearer ${t}` } });
+      if (!res.ok) { setMeta(null); setMetaReason("שגיאה בטעינת נתוני המודעות"); return; }
+      const d = await res.json();
+      setMeta(d.meta || null);
+      setMetaReason(d.meta ? null : (d.reason || "אין נתונים"));
+    } catch { setMeta(null); setMetaReason("שגיאה בטעינת נתוני המודעות"); }
+    finally { setMetaLoading(false); }
+  }, []);
+  useEffect(() => { if (user) loadMeta(from, to); }, [user, from, to, loadMeta]);
 
   const login = async () => { await setPersistence(firebaseAuth(), browserLocalPersistence); await signInWithPopup(firebaseAuth(), googleProvider).catch(() => {}); };
 
@@ -109,25 +197,154 @@ export default function DashboardPage() {
         <div><span className="pcf-badge">ניהול • Tattoo Story</span><h1 style={{ fontSize: 28, margin: "12px 0 0" }}>דשבורד</h1></div>
       </div>
 
-      {/* טווח תאריכים */}
+      {/* טווח תאריכים — פריסטים מוכנים + מותאם אישית */}
       <div className="pcf-card" style={{ marginTop: 4 }}>
-        <div style={{ display: "flex", gap: 14, alignItems: "end", flexWrap: "wrap" }}>
-          <div className="pcf-field" style={{ margin: 0 }}><label>מתאריך</label><input type="date" value={from} onChange={(e) => setFrom(e.target.value)} /></div>
-          <div className="pcf-field" style={{ margin: 0 }}><label>עד תאריך</label><input type="date" value={to} onChange={(e) => setTo(e.target.value)} /></div>
-          <button className="pcf-btn ghost" style={{ padding: "9px 16px" }} onClick={() => { setFrom(""); setTo(""); }}>הצג הכל</button>
-          <span style={{ color: "var(--muted)", fontSize: 13 }}>{from || to ? `מציג לפי טווח (${totalLeads.toLocaleString("he-IL")} לידים)` : `מציג את כל הנתונים (${totalLeads.toLocaleString("he-IL")} לידים)`}</span>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+          {PRESETS.map((pr) => (
+            <button key={pr.key} className={`pcf-pill${preset === pr.key ? " active" : ""}`} onClick={() => pickPreset(pr.key)}>
+              {pr.label}
+            </button>
+          ))}
+        </div>
+        {preset === "custom" && (
+          <div style={{ display: "flex", gap: 14, alignItems: "end", flexWrap: "wrap", marginTop: 12 }}>
+            <div className="pcf-field" style={{ margin: 0 }}><label>מתאריך</label><input type="date" value={from} onChange={(e) => setFrom(e.target.value)} /></div>
+            <div className="pcf-field" style={{ margin: 0 }}><label>עד תאריך</label><input type="date" value={to} onChange={(e) => setTo(e.target.value)} /></div>
+          </div>
+        )}
+        <div style={{ color: "var(--muted)", fontSize: 13, marginTop: 10 }}>
+          {from || to
+            ? `${from || "ההתחלה"} → ${to || "היום"} · ${totalLeads.toLocaleString("he-IL")} לידים נוצרו בטווח`
+            : `כל הנתונים · ${totalLeads.toLocaleString("he-IL")} לידים`}
         </div>
       </div>
 
       {loading && <div className="pcf-spin" style={{ margin: "40px auto" }} />}
       {err && <div className="pcf-err">{err}</div>}
 
-      {/* אריחי מדדים */}
+      {/* מוני המשפך בטווח — נשענים על מה שבאמת תועד במערכת */}
       <div className="pcf-stats" style={{ marginTop: 18 }}>
-        {METRICS.map((m) => (
+        <div className="pcf-stat">
+          <div className="num">{int(funnel?.intakes || 0)}</div>
+          <div className="lbl">לידים שנקלטו
+            <span style={{ display: "block", fontSize: 11, color: "var(--muted)" }}>
+              {int(funnel?.uniqueLeads || 0)} אנשים ייחודיים
+            </span>
+          </div>
+        </div>
+        <div className="pcf-stat">
+          <div className="num">{int(funnel?.callsMade || 0)}</div>
+          <div className="lbl">שיחות שיצאו
+            <span style={{ display: "block", fontSize: 11, color: "var(--muted)" }}>לפי תיעוד נציגה</span>
+          </div>
+        </div>
+        <div className="pcf-stat">
+          <div className="num">{int(funnel?.meetingsScheduled || 0)}</div>
+          <div className="lbl">פגישות שתואמו</div>
+        </div>
+        <div className="pcf-stat">
+          <div className="num">{int(funnel?.meetingsHeld || 0)}</div>
+          <div className="lbl">פגישות שבוצעו</div>
+        </div>
+        <div className="pcf-stat">
+          <div className="num" style={{ color: "var(--green)" }}>{int(funnel?.clientsWon || 0)}</div>
+          <div className="lbl">לקוחות שנסגרו
+            {!!funnel?.intakes && (
+              <span style={{ display: "block", fontSize: 11, color: "var(--muted)" }}>
+                {dec((funnel.clientsWon / funnel.intakes) * 100, 1)}% מהלידים
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* ── חשבון המודעות ── */}
+      <div className="pcf-card" style={{ marginTop: 18, padding: 0, overflow: "hidden" }}>
+        <div className="pcf-admin-tabhead" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+          <span>📣 חשבון המודעות{meta ? ` — ${meta.account}` : ""}</span>
+          {metaLoading
+            ? <span className="pcf-spin" style={{ width: 14, height: 14, borderWidth: 2 }} />
+            : meta && <span style={{ fontWeight: 800 }}>סה״כ תקציב שיצא: {ils(meta.spend)}</span>}
+        </div>
+
+        {!meta && !metaLoading && (
+          <div style={{ padding: 24, color: "var(--muted)" }}>{metaReason || "אין נתונים לטווח הזה"}</div>
+        )}
+
+        {meta && (
+          <>
+            <div className="pcf-stats" style={{ margin: 0, padding: 16, borderBottom: "1px solid var(--line)" }}>
+              <div className="pcf-stat"><div className="num">{ils(meta.spend)}</div><div className="lbl">תקציב שיצא</div></div>
+              <div className="pcf-stat"><div className="num">{int(meta.impressions)}</div><div className="lbl">חשיפות</div></div>
+              <div className="pcf-stat"><div className="num">{int(meta.reach)}</div><div className="lbl">תפוצה</div></div>
+              <div className="pcf-stat"><div className="num">{int(meta.linkClicks)}</div><div className="lbl">קליקים על קישור</div></div>
+              <div className="pcf-stat"><div className="num">{dec(meta.ctr, 2)}%</div><div className="lbl">CTR</div></div>
+              <div className="pcf-stat"><div className="num">{ils(meta.cpc)}</div><div className="lbl">עלות לקליק</div></div>
+              <div className="pcf-stat">
+                <div className="num">{int(meta.leads)}</div>
+                <div className="lbl">לידים ממטא
+                  {meta.leads > 0 && <span style={{ display: "block", fontSize: 11, color: "var(--muted)" }}>{ils(meta.costPerLead)} לליד</span>}
+                </div>
+              </div>
+            </div>
+
+            {meta.campaigns.length === 0 ? (
+              <div style={{ padding: 24, color: "var(--muted)" }}>אף קמפיין לא הוציא תקציב בטווח הזה.</div>
+            ) : (
+              <div style={{ overflowX: "auto" }}>
+                <table className="pcf-table">
+                  <thead>
+                    <tr>
+                      <th>קמפיין</th><th>מטרה</th><th>סטטוס</th><th>תקציב שיצא</th>
+                      <th>חשיפות</th><th>תפוצה</th><th>קליקים על קישור</th>
+                      <th>CTR</th><th>עלות לקליק</th><th>לידים</th><th>עלות לליד</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {meta.campaigns.map((c) => (
+                      <tr key={c.id}>
+                        <td style={{ maxWidth: 320, whiteSpace: "normal" }}><b>{c.name}</b></td>
+                        <td style={{ whiteSpace: "nowrap" }}>{c.objective}</td>
+                        <td style={{ whiteSpace: "nowrap" }}>
+                          <span className={`pcf-pill-status ${c.status === "ACTIVE" ? "done" : "draft"}`}>{c.statusLabel}</span>
+                        </td>
+                        <td style={{ whiteSpace: "nowrap", fontWeight: 700 }}>{ils(c.spend)}</td>
+                        <td>{int(c.impressions)}</td>
+                        <td>{int(c.reach)}</td>
+                        <td>{int(c.linkClicks)}</td>
+                        <td style={{ whiteSpace: "nowrap" }}>{dec(c.ctr, 2)}%</td>
+                        <td style={{ whiteSpace: "nowrap" }}>{ils(c.cpc)}</td>
+                        <td>{c.leads ? <b>{int(c.leads)}</b> : "—"}</td>
+                        <td style={{ whiteSpace: "nowrap" }}>{c.leads ? ils(c.costPerLead) : "—"}</td>
+                      </tr>
+                    ))}
+                    <tr style={{ background: "var(--surface-2)", fontWeight: 800 }}>
+                      <td>סיכום ({meta.campaigns.length} קמפיינים)</td><td /><td />
+                      <td style={{ whiteSpace: "nowrap" }}>{ils(meta.campaigns.reduce((a, c) => a + c.spend, 0))}</td>
+                      <td>{int(meta.campaigns.reduce((a, c) => a + c.impressions, 0))}</td>
+                      <td>{int(meta.reach)}</td>
+                      <td>{int(meta.campaigns.reduce((a, c) => a + c.linkClicks, 0))}</td>
+                      <td /><td />
+                      <td>{int(meta.campaigns.reduce((a, c) => a + c.leads, 0))}</td>
+                      <td />
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            )}
+            <div style={{ padding: "10px 16px", color: "var(--muted)", fontSize: 12, borderTop: "1px solid var(--line)" }}>
+              תפוצה היא אנשים ייחודיים, ולכן סכום התפוצה של הקמפיינים אינו שווה לתפוצת החשבון (אותו אדם נחשף לכמה קמפיינים). שורת הסיכום מציגה את תפוצת החשבון.
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* אריחי מדדים לפי שלב במשפך */}
+      <div className="pcf-stats" style={{ marginTop: 18 }}>
+        {METRICS.filter((m) => !m.placeholder).map((m) => (
           <div className="pcf-stat" key={m.key}>
-            <div className="num" style={{ color: m.placeholder ? "var(--muted)" : undefined }}>{m.placeholder ? "—" : rowFor(m.minIdx).total}</div>
-            <div className="lbl">{m.label}{m.placeholder && <span style={{ display: "block", fontSize: 11 }}>(בקרוב)</span>}</div>
+            <div className="num">{rowFor(m.minIdx).total}</div>
+            <div className="lbl">{m.label}</div>
           </div>
         ))}
       </div>

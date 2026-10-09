@@ -17,3 +17,4 @@ _*.tmp.txt
 _*
 *.tmp.*
 _legacy-backup/
+_make-backup/

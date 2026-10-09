@@ -43,7 +43,21 @@ Next.js 15 (App Router) · TypeScript · Supabase (Postgres + Auth + Storage) ·
   תיעוד אחרון (`lastNotesFor`), ותאריך+שעה לפולואפ (`custom.followup_at`) שנערך
   ישר מהטבלה ונצבע לפי עבר/היום/עתיד.
 - `/admin/matching` — צינור **פגישות התאמה**. ליד נכנס לכאן אוטומטית ברגע שנסגר (WON).
-- `/admin/dashboard` — משפך, פילוחים לפי פלטפורמה / דף נחיתה / מודעה, נתוני מטא, עוזר נתונים (DataChat).
+- `/admin/dashboard` — **דשבורד**. טווחי זמן מוכנים (היום / אתמול / השבוע מראשון /
+  החודש / 30 ימים / מותאם / הכל), ברירת מחדל = החודש הנוכחי, מחושבים בשעון מקומי.
+  שלושה אזורים:
+  1. **מוני משפך** (`funnel_stats` במיגרציה 0021 → `/api/admin/funnel`): לידים שנקלטו
+     (כל `intake`, כך שקליטה חוזרת נספרת שוב) + ייחודיים · שיחות שיצאו (תאריך שיחה
+     בטווח, או תיעוד/שינוי שלב בידי נציגה בשם — ייבוא ושאלון לא נספרים) · פגישות
+     שתואמו (`compass_entered_at` בטווח) · פגישות שבוצעו (סטטוס met/progressed או
+     שליאור תיעד) · לקוחות שנסגרו (`clients.converted_at`) עם אחוז המרה.
+  2. **חשבון המודעות** (`/api/admin/meta` → `lib/metaInsights.ts`): סיכום חשבון +
+     שורה לכל קמפיין שהוציא תקציב, עם תקציב, חשיפות, תפוצה, קליקים על קישור, CTR,
+     CPC, לידים ועלות לליד, וסיכום בתחתית. חשבון: `act_1026356652124107`.
+     ⚠️ סכום התפוצה של הקמפיינים ≠ תפוצת החשבון (אנשים ייחודיים) — השורה מציגה את
+     תפוצת החשבון בכוונה.
+  3. פילוחים לפי פלטפורמה / דף נחיתה / מודעה, אריחי שלבים, ועוזר הנתונים (DataChat).
+  נתוני המטא נטענים בקריאה נפרדת, כדי שה-Graph API לא יעכב את שאר הדשבורד.
 - `/admin/whatsapp` — אינבוקס GreenAPI (תוספת של ליאור, לא קיים ב-finance-form).
 - `/admin/templates` — תבניות חוזה + שליחה לחתימה. `/sign/[token]` — דף החתימה הציבורי.
 - `/` — שאלון המועמדות הציבורי. `/portal` — פורטל הלקוחה (מסע 9 שלבים).
@@ -131,15 +145,19 @@ node scripts/apply-migrations.mjs   # מריץ לפי סדר שם הקובץ, מ
 ## Env
 
 מוגדר ועובד: `SUPABASE_*`, `GREENAPI_INSTANCE/TOKEN` (instance 7105326802), `BASE_URL`,
+`META_ACCESS_TOKEN` / `META_SYSTEM_TOKEN` (System User של Tattoo Story, לא פג),
 `MAIL_FROM`, `NOTIFY_EMAIL`, `MEETINGS_CALENDAR_USER`, `META_AD_ACCOUNT`
 (`act_1026356652124107`), `META_BUSINESS_ID` (`532639584829569`), `CRON_SECRET`,
 `META_WEBHOOK_VERIFY_TOKEN`.
+
+להעברת טוקן המטא מחדש (אם יוחלף): `node scripts/_set-meta-token.mjs` — קורא מ-
+`~/.claude/mcp-tokens/tattoostory.json`, כותב ל-`.env.local` ודוחף ל-Vercel דרך stdin
+של ה-CLI, בלי שהערך עובר במקום אחר, ומאמת מול חשבון המודעות.
 
 **חסר — דורש חשבון של ליאור:**
 
 | Env | מה זה מפעיל |
 |---|---|
-| `META_ACCESS_TOKEN`, `META_SYSTEM_TOKEN` | נתוני מטא בדשבורד + סקשן מאניצ'אט |
 | `GOOGLE_SA_B64`, `GOOGLE_IMPERSONATE_USER`, `DRIVE_PARENT_FOLDER_ID` | Google Drive (תיקיית לקוחה), יומן גוגל (קביעת פגישות), שליחת מייל |
 | `CARDCOM_TERMINAL`, `CARDCOM_API_NAME`, `CARDCOM_API_PASSWORD` | סליקה בפורטל |
 

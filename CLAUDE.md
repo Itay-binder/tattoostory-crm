@@ -22,8 +22,13 @@ Next.js 15 (App Router) · TypeScript · Supabase (Postgres + Auth + Storage) ·
 - **אימות:** Supabase Google OAuth. `lib/authClient.ts` עוטף את ה-API בשמות של Firebase
   כדי שהדפים לא ישתנו — **אין Firebase בפרויקט הזה**. גם `lib/firebaseAdmin.ts` הוא
   שם היסטורי בלבד; `verifyRequest()` מאמת טוקן Supabase.
-- **הרשאות אדמין:** `lib/admin.ts` → `ADMIN_EMAILS` (itay@binder.co.il, liorrubin3@gmail.com).
-  להוספת נציגה: להוסיף את המייל גם ל-`ADMIN_EMAILS` וגם ל-`REPS` ב-`lib/reps.ts`.
+- **הרשאות אדמין:** `lib/admin.ts` → `ADMIN_EMAILS` — itay@binder.co.il,
+  liorrubin3@gmail.com, shoovg@gmail.com (גילי). **אין דרגות הרשאה**: כל מי שברשימה
+  רואה ועושה הכל, כולל מחיקת לידים.
+  להוספת נציגה: להוסיף את המייל ל-`ADMIN_EMAILS`, להחליף איתו את מזהה התצוגה
+  `rep:<slug>` ב-`lib/reps.ts`, ולהעביר את הלידים שלה —
+  **עם `alter table leads disable trigger leads_touch`**, אחרת תאריך העדכון נדרס.
+  דוגמה מלאה: `scripts/_add-admin-gili.mjs`.
 - **אחסון:** דלי Supabase פרטי בשם `files` (`lib/storage.ts`). prefixes: `finance-form/`,
   `contract-templates/`, `contract-signatures/`, `contract-signed/`.
 - **פונט:** IBM Plex Sans Hebrew · **ערכה:** בהירה כברירת מחדל (sage/קרם), כהה דרך ה-toggle.

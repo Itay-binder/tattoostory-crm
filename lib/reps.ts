@@ -16,7 +16,7 @@ export const REPS: Rep[] = [
   // ולהריץ:  update leads set assigned_to = '<המייל>' where assigned_to = 'rep:<slug>';
   { email: "rep:shir", name: "שיר", initials: "שי", color: "#a855f7" },
   { email: "rep:lihi", name: "ליהי", initials: "לי", color: "#3b82f6" },
-  { email: "rep:gili", name: "גילי", initials: "גי", color: "#14b8a6" },
+  { email: "shoovg@gmail.com", name: "גילי", initials: "גי", color: "#14b8a6" },
   { email: "rep:noam", name: "נעם", initials: "נע", color: "#f59e0b" },
   { email: "rep:yahali", name: "יהלי", initials: "יה", color: "#ec4899" },
   { email: "rep:inbal", name: "ענבל", initials: "ענ", color: "#22c55e" },

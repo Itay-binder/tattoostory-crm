@@ -64,7 +64,7 @@ const CORE_COLUMNS: Column[] = [
   { key: "assignedTo", label: "נציגה", get: (l) => repByEmail(l.assignedTo)?.name || "", kind: "meta" },
   { key: "custom.last_call_at", label: "תאריך שיחה אחרונה", get: (l) => l.custom?.last_call_at || "", isDay: true, kind: "followup" },
   { key: "lastNote", label: "תיעוד אחרון", get: () => "", kind: "followup" },
-  { key: "custom.followup_at", label: "פולואפ (נקבע)", get: (l) => l.custom?.followup_at || "", isDate: true, kind: "followup" },
+  { key: "followUpAt", label: "מתי לחזור", get: (l) => l.followUpAt || "", isDate: true, kind: "followup" },
   { key: "createdAt", label: "נוצר", get: (l) => l.createdAt, isDate: true, kind: "meta" },
   { key: "lastLeadAt", label: "קליטה אחרונה", get: (l) => l.lastLeadAt, isDate: true, kind: "meta" },
   { key: "updatedAt", label: "עודכן", get: (l) => l.updatedAt, isDate: true, kind: "meta" },
@@ -73,7 +73,7 @@ const CORE_COLUMNS: Column[] = [
 ];
 const DEFAULT_VISIBLE = [
   "fullName", "whatsapp", "stage", "assignedTo",
-  "custom.last_call_at", "lastNote", "custom.followup_at", "updatedAt",
+  "custom.last_call_at", "lastNote", "followUpAt", "updatedAt",
 ];
 
 export default function FollowupsPage() {
@@ -89,7 +89,7 @@ export default function FollowupsPage() {
 
   const [visible, setVisible] = useState<string[]>(DEFAULT_VISIBLE);
   const [showCols, setShowCols] = useState(false);
-  const [sortKey, setSortKey] = useState("custom.followup_at");
+  const [sortKey, setSortKey] = useState("followUpAt");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const [filters, setFilters] = useState<Record<string, string>>({});
   const [stageTabs, setStageTabs] = useState<string[]>([]);
@@ -176,22 +176,28 @@ export default function FollowupsPage() {
     const n = [...p]; const [m] = n.splice(dragCol, 1); n.splice(to, 0, m); return n;
   });
 
-  /** קובע/מנקה את תאריך ושעת הפולואפ */
+  /** קובע/מנקה את תאריך ושעת הפולואפ. זהו אותו שדה בדיוק שכרטיס הליד שומר. */
   const saveFollowup = async (lead: Lead, localValue: string) => {
+    let iso = "";
+    if (localValue) {
+      const d = new Date(localValue);
+      // הקלדה ידנית בשדה תאריך מייצרת בקלות שנה דו-ספרתית (0026 במקום 2026)
+      if (isNaN(d.getTime()) || d.getFullYear() < 2020 || d.getFullYear() > 2100) {
+        setErr("תאריך פולואפ לא תקין — בדקו את השנה"); return;
+      }
+      iso = d.toISOString();
+    }
     setSavingId(lead.id);
+    setErr(null);
     try {
       const t = await firebaseAuth().currentUser!.getIdToken();
-      const iso = localValue ? new Date(localValue).toISOString() : "";
       const res = await fetch(`/api/admin/leads/${lead.id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${t}` },
-        body: iso
-          ? JSON.stringify({ action: "update", custom: { followup_at: iso } })
-          : JSON.stringify({ action: "update", clearCustom: ["followup_at"] }),
+        body: JSON.stringify({ action: "update", followUpAt: iso || null }),
       });
       if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || "update failed");
-      setLeads((prev) => prev.map((l) => (l.id === lead.id
-        ? { ...l, custom: { ...l.custom, followup_at: iso } } : l)));
+      setLeads((prev) => prev.map((l) => (l.id === lead.id ? { ...l, followUpAt: iso || undefined } : l)));
     } catch (e) { setErr((e as Error).message); }
     finally { setSavingId(null); }
   };
@@ -330,7 +336,7 @@ export default function FollowupsPage() {
             <tbody>
               {leads.map((l) => {
                 const note = lastNotes[l.id];
-                const kind = dueKind(l.custom?.followup_at);
+                const kind = dueKind(l.followUpAt);
                 return (
                   <tr key={l.id} onClick={() => (window.location.href = `/admin/leads/${l.id}`)}>
                     {visibleCols.map((c) => (
@@ -348,11 +354,13 @@ export default function FollowupsPage() {
                               <span title={note.text}>{note.text.length > 90 ? note.text.slice(0, 90) + "…" : note.text}</span>
                             </span>
                           ) : <span style={{ color: "var(--muted)" }}>אין תיעוד</span>)
-                          : c.key === "custom.followup_at" ? (
+                          : c.key === "followUpAt" ? (
                             <span onClick={(e) => e.stopPropagation()} style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
                               <input
                                 type="datetime-local"
-                                value={toLocalInput(l.custom?.followup_at)}
+                                min="2020-01-01T00:00"
+                                max="2100-12-31T23:59"
+                                value={toLocalInput(l.followUpAt)}
                                 onChange={(e) => saveFollowup(l, e.target.value)}
                                 disabled={savingId === l.id}
                                 style={{

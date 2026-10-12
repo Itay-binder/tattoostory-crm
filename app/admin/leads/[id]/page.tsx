@@ -166,9 +166,17 @@ export default function LeadDetail({ params }: { params: Promise<{ id: string }>
   const saveFuPopup = async () => {
     setFuPopupBusy(true);
     try {
-      const followUpAtUtc = fuPopupDate
-        ? new Date(`${fuPopupDate}T${fuPopupTime || "00:00"}`).toISOString()
-        : null;
+      let followUpAtUtc: string | null = null;
+      if (fuPopupDate) {
+        const d = new Date(`${fuPopupDate}T${fuPopupTime || "00:00"}`);
+        // שנה דו-ספרתית בהקלדה ידנית הפכה בעבר ל-0026 במקום 2026
+        if (isNaN(d.getTime()) || d.getFullYear() < 2020 || d.getFullYear() > 2100) {
+          setMsg("תאריך פולואפ לא תקין — בדקו את השנה");
+          setFuPopupBusy(false);
+          return;
+        }
+        followUpAtUtc = d.toISOString();
+      }
       let d = await post({ action: "update", followUpAt: followUpAtUtc });
       apply(d.lead);
       if (fuPopupNote.trim()) {
@@ -405,7 +413,7 @@ export default function LeadDetail({ params }: { params: Promise<{ id: string }>
               <div>
                 <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "var(--muted)", marginBottom: 6, textTransform: "uppercase", letterSpacing: .5 }}>מתי לחזור</label>
                 <div style={{ display: "flex", gap: 8 }}>
-                  <input type="date" value={fuPopupDate} onChange={(e) => setFuPopupDate(e.target.value)} style={{ flex: 1, minWidth: 0 }} />
+                  <input type="date" min="2020-01-01" max="2100-12-31" value={fuPopupDate} onChange={(e) => setFuPopupDate(e.target.value)} style={{ flex: 1, minWidth: 0 }} />
                   <input type="time" value={fuPopupTime} onChange={(e) => setFuPopupTime(e.target.value)} style={{ flex: 1, minWidth: 0 }} disabled={!fuPopupDate} />
                 </div>
               </div>

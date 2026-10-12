@@ -18,7 +18,7 @@ export async function GET(req: Request) {
   const result = await listLeadsPage({
     page: Number(sp.get("page")) || 1,
     stage: sp.get("stage") || "all",
-    sortKey: sp.get("sortKey") || "custom.followup_at",
+    sortKey: sp.get("sortKey") || "followUpAt",
     sortDir: sp.get("sortDir") === "asc" ? "asc" : "desc",
     scope: "followups",
     filters,

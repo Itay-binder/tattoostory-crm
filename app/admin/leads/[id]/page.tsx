@@ -46,7 +46,8 @@ export default function LeadDetail({ params }: { params: Promise<{ id: string }>
   const [loading, setLoading] = useState(true);
   const [savingCore, setSavingCore] = useState(false);
   const [core, setCore] = useState({ firstName: "", lastName: "", email: "", phone: "", idNumber: "" });
-  const [followUpAt, setFollowUpAt] = useState("");
+  const [followUpDate, setFollowUpDate] = useState("");
+  const [followUpTime, setFollowUpTime] = useState("");
   const [quali, setQuali] = useState<Record<string, string>>({});
   const [custom, setCustom] = useState<Record<string, string>>({});
   const [customDefs, setCustomDefs] = useState<{ id: string; label: string; type: string; options?: string[] }[]>([]);
@@ -79,8 +80,10 @@ export default function LeadDetail({ params }: { params: Promise<{ id: string }>
     if (l.followUpAt) {
       const d = new Date(l.followUpAt);
       const pad = (n: number) => String(n).padStart(2, "0");
-      setFollowUpAt(`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`);
-    } else { setFollowUpAt(""); }
+      setFollowUpDate(`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`);
+      const hh = pad(d.getHours()); const mm = pad(d.getMinutes());
+      setFollowUpTime(hh === "00" && mm === "00" ? "" : `${hh}:${mm}`);
+    } else { setFollowUpDate(""); setFollowUpTime(""); }
     // הכרטיס נטען עם 50 הרשומות האחרונות בלבד; השאר נמשכות בלחיצה על "טען עוד".
     setActs(l.activity || []);
     setActTotal(l.activityTotal ?? (l.activity || []).length);
@@ -127,7 +130,9 @@ export default function LeadDetail({ params }: { params: Promise<{ id: string }>
   const saveCore = async () => {
     setSavingCore(true); setMsg(null);
     try {
-      const followUpAtUtc = followUpAt ? new Date(followUpAt).toISOString() : null;
+      const followUpAtUtc = followUpDate
+        ? new Date(`${followUpDate}T${followUpTime || "00:00"}`).toISOString()
+        : null;
       const d = await post({ action: "update", ...core, quali, custom, followUpAt: followUpAtUtc });
       apply(d.lead); setMsg("נשמר ✓");
     }
@@ -393,7 +398,14 @@ export default function LeadDetail({ params }: { params: Promise<{ id: string }>
           <div className="pcf-field"><label>טלפון</label><input dir="ltr" style={{ textAlign: "right" }} value={core.phone} onChange={(e) => setCore({ ...core, phone: e.target.value })} /></div>
           <div className="pcf-field"><label>מייל</label><input dir="ltr" style={{ textAlign: "right" }} value={core.email} onChange={(e) => setCore({ ...core, email: e.target.value })} /></div>
           <div className="pcf-field"><label>תעודת זהות</label><input value={core.idNumber} onChange={(e) => setCore({ ...core, idNumber: e.target.value })} /></div>
-          <div className="pcf-field"><label>מתי לחזור</label><input type="datetime-local" value={followUpAt} onChange={(e) => setFollowUpAt(e.target.value)} /></div>
+          <div className="pcf-field">
+            <label>מתי לחזור</label>
+            <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+              <input type="date" value={followUpDate} onChange={(e) => setFollowUpDate(e.target.value)} style={{ flex: 1 }} />
+              <input type="time" value={followUpTime} onChange={(e) => setFollowUpTime(e.target.value)} style={{ width: 86 }} disabled={!followUpDate} />
+              {followUpDate && <button type="button" onClick={() => { setFollowUpDate(""); setFollowUpTime(""); }} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--accent)", fontSize: 14, padding: "0 2px", lineHeight: 1 }}>✕</button>}
+            </div>
+          </div>
         </div>
 
         <h3 style={{ margin: "18px 0 8px", fontSize: 16 }}>שדות הסמכה (filtertnx)</h3>

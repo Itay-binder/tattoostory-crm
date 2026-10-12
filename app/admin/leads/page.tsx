@@ -23,7 +23,14 @@ function RepAvatar({ email }: { email?: string }) {
 
 function fmtDate(s: string): string {
   if (!s) return "—";
-  try { return new Date(s).toLocaleString("he-IL", { timeZone: "Asia/Jerusalem", dateStyle: "short", timeStyle: "short" }); }
+  try {
+    const d = new Date(s);
+    const parts = new Intl.DateTimeFormat("he-IL", { timeZone: "Asia/Jerusalem", hour: "numeric", minute: "numeric" }).formatToParts(d);
+    const h = parts.find(p => p.type === "hour")?.value;
+    const m = parts.find(p => p.type === "minute")?.value;
+    const showTime = !(h === "0" && m === "00");
+    return d.toLocaleString("he-IL", { timeZone: "Asia/Jerusalem", dateStyle: "short", ...(showTime ? { timeStyle: "short" } : {}) });
+  }
   catch { return s; }
 }
 const STAGE_COLORS: Record<string, string> = { done: "done", won: "done" };

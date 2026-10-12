@@ -103,6 +103,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         email: body.email, phone: body.phone, idNumber: body.idNumber,
         stage: body.stage, answers: body.answers, quali: body.quali, custom: body.custom,
         clearCustom: Array.isArray(body.clearCustom) ? body.clearCustom : undefined,
+        followUpAt: body.followUpAt !== undefined ? (body.followUpAt || null) : undefined,
       });
       if (!lead) return NextResponse.json({ error: "not found" }, { status: 404 });
       return NextResponse.json({ ok: true, lead });

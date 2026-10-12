@@ -44,6 +44,7 @@ const CORE_COLUMNS: Column[] = [
   { key: "createdAt", label: "נוצר", get: (l) => l.createdAt, isDate: true, kind: "meta" },
   { key: "updatedAt", label: "עודכן", get: (l) => l.updatedAt, isDate: true, kind: "meta" },
   { key: "lastLeadAt", label: "קליטה אחרונה", get: (l) => l.lastLeadAt, isDate: true, kind: "meta" },
+  { key: "followUpAt", label: "מתי לחזור", get: (l) => l.followUpAt || "", isDate: true, kind: "meta" },
   { key: "custom.landingpage", label: "דף נחיתה", get: (l) => l.custom?.landingpage || "", kind: "custom" },
 ];
 // סדר העמודות שאיתי קבע (10/2026) — ברירת המחדל לכל המשתמשים.
@@ -390,6 +391,20 @@ export default function LeadsPage() {
                         <select value={filters[c.key] || ""} onChange={(e) => setFilter(c.key, e.target.value)}>
                           <option value="">הכל</option>
                           {REPS.map((r) => <option key={r.email} value={r.name}>{r.name}</option>)}
+                        </select>
+                      ) : c.key === "followUpAt" ? (
+                        <select
+                          value={sortKey === "followUpAt" ? sortDir : ""}
+                          onChange={(e) => {
+                            const v = e.target.value;
+                            setPage(1);
+                            if (v === "asc" || v === "desc") { setSortKey("followUpAt"); setSortDir(v); }
+                            else { setSortKey("updatedAt"); setSortDir("desc"); }
+                          }}
+                        >
+                          <option value="">מיון...</option>
+                          <option value="asc">הכי קרוב</option>
+                          <option value="desc">הכי רחוק</option>
                         </select>
                       ) : c.key === "whatsapp" ? null : (
                         <input value={filters[c.key] || ""} onChange={(e) => setFilter(c.key, e.target.value)} placeholder="סינון…" />

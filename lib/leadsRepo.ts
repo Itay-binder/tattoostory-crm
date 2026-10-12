@@ -78,6 +78,7 @@ interface LeadRow {
   compass_status: string | null; compass_entered_at: string | null; assigned_to: string | null;
   created_at: string; updated_at: string; last_lead_at: string;
   category?: string | null; distribution_last_at?: string | null; portal_access?: boolean | null;
+  follow_up_at?: string | null;
   lead_activity?: ActivityRow[];
 }
 interface ActivityRow { id: string; type: string; at: string; source: string; by_actor: string; text: string | null; fields: Record<string, string> | null }
@@ -101,6 +102,7 @@ function rowToLead(r: LeadRow): Lead {
     category: (r.category as Lead["category"]) || "sales",
     distributionLastAt: r.distribution_last_at || undefined,
     portalAccess: !!r.portal_access,
+    followUpAt: r.follow_up_at || undefined,
   };
 }
 
@@ -113,7 +115,7 @@ const SEL = "*, lead_activity(*)";
  */
 const SEL_LIST =
   "id,first_name,last_name,full_name,email,phone,id_number,stage,quali,custom," +
-  "created_at,updated_at,last_lead_at,converted_client_id,compass_status,compass_entered_at,assigned_to,category,distribution_last_at,portal_access";
+  "created_at,updated_at,last_lead_at,converted_client_id,compass_status,compass_entered_at,assigned_to,category,distribution_last_at,portal_access,follow_up_at";
 
 export async function listLeads(): Promise<Lead[]> {
   const { data, error } = await supa().from("leads").select(SEL_LIST).order("updated_at", { ascending: false });
@@ -134,6 +136,7 @@ const CORE_COL_DB: Record<string, string> = {
   phone: "phone", email: "email", idNumber: "id_number", stage: "stage",
   assignedTo: "assigned_to",
   createdAt: "created_at", updatedAt: "updated_at", lastLeadAt: "last_lead_at",
+  followUpAt: "follow_up_at",
 };
 
 function colToDb(key: string): string | null {
@@ -520,7 +523,7 @@ export async function upsertLead(intake: LeadIntake, meta: { source: string; by:
 
 export async function updateLeadFields(
   id: string,
-  patch: Partial<LeadIntake> & { stage?: LeadStage; clearCustom?: string[] },
+  patch: Partial<LeadIntake> & { stage?: LeadStage; clearCustom?: string[]; followUpAt?: string | null },
 ): Promise<Lead | null> {
   const existing = await getLead(id);
   if (!existing) return null;
@@ -542,6 +545,7 @@ export async function updateLeadFields(
     for (const k of patch.clearCustom || []) delete next[k];
     upd.custom = next;
   }
+  if (patch.followUpAt !== undefined) upd.follow_up_at = patch.followUpAt || null;
   const { error } = await supa().from("leads").update(upd).eq("id", id);
   if (error) throw new Error(error.message);
   return getLead(id);

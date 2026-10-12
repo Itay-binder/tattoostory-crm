@@ -241,6 +241,8 @@ export interface Lead {
   compassEnteredAt?: string;
   /** גישה לפורטל הלקוח נפתחה (דגל דביק — טריגר גישה, לא שלב) */
   portalAccess?: boolean;
+  /** מתי לחזור — תאריך ושעה (שעון ישראל, שמור כ-UTC) */
+  followUpAt?: string;
 }
 
 /** קלט לקליטת/עדכון ליד (ידני/API/CSV). */

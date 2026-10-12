@@ -46,6 +46,7 @@ export default function LeadDetail({ params }: { params: Promise<{ id: string }>
   const [loading, setLoading] = useState(true);
   const [savingCore, setSavingCore] = useState(false);
   const [core, setCore] = useState({ firstName: "", lastName: "", email: "", phone: "", idNumber: "" });
+  const [followUpAt, setFollowUpAt] = useState("");
   const [quali, setQuali] = useState<Record<string, string>>({});
   const [custom, setCustom] = useState<Record<string, string>>({});
   const [customDefs, setCustomDefs] = useState<{ id: string; label: string; type: string; options?: string[] }[]>([]);
@@ -75,6 +76,11 @@ export default function LeadDetail({ params }: { params: Promise<{ id: string }>
     setCore({ firstName: l.firstName, lastName: l.lastName, email: l.email, phone: l.phone, idNumber: l.idNumber });
     setQuali(l.quali || {});
     setCustom(l.custom || {});
+    if (l.followUpAt) {
+      const d = new Date(l.followUpAt);
+      const pad = (n: number) => String(n).padStart(2, "0");
+      setFollowUpAt(`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`);
+    } else { setFollowUpAt(""); }
     // הכרטיס נטען עם 50 הרשומות האחרונות בלבד; השאר נמשכות בלחיצה על "טען עוד".
     setActs(l.activity || []);
     setActTotal(l.activityTotal ?? (l.activity || []).length);
@@ -120,7 +126,11 @@ export default function LeadDetail({ params }: { params: Promise<{ id: string }>
 
   const saveCore = async () => {
     setSavingCore(true); setMsg(null);
-    try { const d = await post({ action: "update", ...core, quali, custom }); apply(d.lead); setMsg("נשמר ✓"); }
+    try {
+      const followUpAtUtc = followUpAt ? new Date(followUpAt).toISOString() : null;
+      const d = await post({ action: "update", ...core, quali, custom, followUpAt: followUpAtUtc });
+      apply(d.lead); setMsg("נשמר ✓");
+    }
     catch (e) { setMsg(`נכשל — ${(e as Error).message}`); } finally { setSavingCore(false); }
   };
 
@@ -383,6 +393,7 @@ export default function LeadDetail({ params }: { params: Promise<{ id: string }>
           <div className="pcf-field"><label>טלפון</label><input dir="ltr" style={{ textAlign: "right" }} value={core.phone} onChange={(e) => setCore({ ...core, phone: e.target.value })} /></div>
           <div className="pcf-field"><label>מייל</label><input dir="ltr" style={{ textAlign: "right" }} value={core.email} onChange={(e) => setCore({ ...core, email: e.target.value })} /></div>
           <div className="pcf-field"><label>תעודת זהות</label><input value={core.idNumber} onChange={(e) => setCore({ ...core, idNumber: e.target.value })} /></div>
+          <div className="pcf-field"><label>מתי לחזור</label><input type="datetime-local" value={followUpAt} onChange={(e) => setFollowUpAt(e.target.value)} /></div>
         </div>
 
         <h3 style={{ margin: "18px 0 8px", fontSize: 16 }}>שדות הסמכה (filtertnx)</h3>

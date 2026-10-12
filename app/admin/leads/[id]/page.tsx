@@ -67,6 +67,11 @@ export default function LeadDetail({ params }: { params: Promise<{ id: string }>
   const [conflict, setConflict] = useState<null | { conflict: { summary: string; from: string; to: string }; before: { time: string; free: boolean }; after: { time: string; free: boolean }; time: string }>(null);
   const [callReq, setCallReq] = useState<CallRequest | null>(null);
   const [callBusy, setCallBusy] = useState(false);
+  const [fuPopupOpen, setFuPopupOpen] = useState(false);
+  const [fuPopupDate, setFuPopupDate] = useState("");
+  const [fuPopupTime, setFuPopupTime] = useState("");
+  const [fuPopupNote, setFuPopupNote] = useState("");
+  const [fuPopupBusy, setFuPopupBusy] = useState(false);
 
   useEffect(() => onAuthStateChanged(firebaseAuth(), (u) => { setUser(u); setAuthReady(true); }), []);
 
@@ -150,16 +155,34 @@ export default function LeadDetail({ params }: { params: Promise<{ id: string }>
     setMsg(null);
     try {
       const d = await post({ action: "set-stage", stage }); apply(d.lead);
-      // פולואפ → פותח תיאום פגישה ביומן האישי של הנציג שסימן
       if (stage === "followup") {
-        setFollowupMode(true);
-        setMeet((m) => ({ ...m, title: `פולואפ — ${d.lead.fullName || "ליד"}`, durationMin: 30, location: "" }));
-        setMeetTypeId("");
-        setMeetOpen(true);
-        setMsg("סומן פולואפ — קבעו פגישה ביומן שלכם 📅");
+        // פותח פופאפ פולואפ עתידי עם ברירת מחדל להיום
+        const today = new Date();
+        const pad = (n: number) => String(n).padStart(2, "0");
+        setFuPopupDate(`${today.getFullYear()}-${pad(today.getMonth()+1)}-${pad(today.getDate())}`);
+        setFuPopupTime(""); setFuPopupNote("");
+        setFuPopupOpen(true);
       }
     }
     catch (e) { setMsg(`נכשל — ${(e as Error).message}`); }
+  };
+
+  const saveFuPopup = async () => {
+    setFuPopupBusy(true);
+    try {
+      const followUpAtUtc = fuPopupDate
+        ? new Date(`${fuPopupDate}T${fuPopupTime || "00:00"}`).toISOString()
+        : null;
+      let d = await post({ action: "update", followUpAt: followUpAtUtc });
+      apply(d.lead);
+      if (fuPopupNote.trim()) {
+        d = await post({ action: "note", text: fuPopupNote.trim() });
+        apply(d.lead);
+      }
+      setFuPopupOpen(false);
+      setMsg("פולואפ עתידי נשמר ✓");
+    } catch (e) { setMsg(`נכשל — ${(e as Error).message}`); }
+    finally { setFuPopupBusy(false); }
   };
 
   /** פותח גישה לפורטל הלקוח (טריגר). לא משנה את שלב הפייפליין — אפשר לסמן סטטוס מיד אחרי. */
@@ -375,6 +398,42 @@ export default function LeadDetail({ params }: { params: Promise<{ id: string }>
           )}
         </div>
       )}
+      {fuPopupOpen && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.55)", zIndex: 1200, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }} onClick={() => setFuPopupOpen(false)}>
+          <div style={{ background: "var(--card-a, var(--card))", border: "1px solid var(--line)", borderRadius: 18, padding: "28px 28px 24px", width: "100%", maxWidth: 400, boxShadow: "0 12px 48px rgba(0,0,0,.4)", textAlign: "right" }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ marginBottom: 20 }}>
+              <div style={{ fontSize: 22, fontWeight: 800, letterSpacing: -.3 }}>📅 פולואפ עתידי</div>
+              <div style={{ fontSize: 13, color: "var(--muted)", marginTop: 3 }}>{lead?.fullName}</div>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              <div>
+                <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "var(--muted)", marginBottom: 6, textTransform: "uppercase", letterSpacing: .5 }}>מתי לחזור</label>
+                <div style={{ display: "flex", gap: 8 }}>
+                  <input type="date" value={fuPopupDate} onChange={(e) => setFuPopupDate(e.target.value)} style={{ flex: 1, minWidth: 0 }} />
+                  <input type="time" value={fuPopupTime} onChange={(e) => setFuPopupTime(e.target.value)} style={{ flex: 1, minWidth: 0 }} disabled={!fuPopupDate} />
+                </div>
+              </div>
+              <div>
+                <label style={{ display: "block", fontSize: 12, fontWeight: 700, color: "var(--muted)", marginBottom: 6, textTransform: "uppercase", letterSpacing: .5 }}>תיעוד (אופציונלי)</label>
+                <textarea
+                  value={fuPopupNote}
+                  onChange={(e) => setFuPopupNote(e.target.value)}
+                  placeholder="הוסף הערה..."
+                  rows={3}
+                  style={{ width: "100%", resize: "vertical", padding: "10px 12px", borderRadius: 10, border: "1px solid var(--line)", background: "var(--surface)", color: "var(--text)", fontFamily: "inherit", fontSize: 14, boxSizing: "border-box", outline: "none" }}
+                />
+              </div>
+              <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", paddingTop: 4 }}>
+                <button className="pcf-btn ghost" onClick={() => setFuPopupOpen(false)} style={{ padding: "10px 20px", fontSize: 14 }}>סגור</button>
+                <button className="pcf-btn" onClick={saveFuPopup} disabled={fuPopupBusy} style={{ padding: "10px 26px", fontSize: 14 }}>
+                  {fuPopupBusy ? "שומר…" : "שמור"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {msg && <div className={msg.includes("✓") ? "pcf-ok" : "pcf-err"} style={{ marginTop: 10 }}>{msg}</div>}
 
       {/* סטטוס בקשת חיוג מרחוק */}
@@ -401,8 +460,8 @@ export default function LeadDetail({ params }: { params: Promise<{ id: string }>
           <div className="pcf-field">
             <label>מתי לחזור</label>
             <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-              <input type="date" value={followUpDate} onChange={(e) => setFollowUpDate(e.target.value)} style={{ flex: 1 }} />
-              <input type="time" value={followUpTime} onChange={(e) => setFollowUpTime(e.target.value)} style={{ width: 86 }} disabled={!followUpDate} />
+              <input type="date" value={followUpDate} onChange={(e) => setFollowUpDate(e.target.value)} style={{ flex: 1, minWidth: 0 }} />
+              <input type="time" value={followUpTime} onChange={(e) => setFollowUpTime(e.target.value)} style={{ flex: 1, minWidth: 0 }} disabled={!followUpDate} />
               {followUpDate && <button type="button" onClick={() => { setFollowUpDate(""); setFollowUpTime(""); }} style={{ background: "none", border: "none", cursor: "pointer", color: "var(--accent)", fontSize: 14, padding: "0 2px", lineHeight: 1 }}>✕</button>}
             </div>
           </div>

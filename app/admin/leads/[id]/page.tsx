@@ -156,11 +156,7 @@ export default function LeadDetail({ params }: { params: Promise<{ id: string }>
     try {
       const d = await post({ action: "set-stage", stage }); apply(d.lead);
       if (stage === "followup") {
-        // פותח פופאפ פולואפ עתידי עם ברירת מחדל להיום
-        const today = new Date();
-        const pad = (n: number) => String(n).padStart(2, "0");
-        setFuPopupDate(`${today.getFullYear()}-${pad(today.getMonth()+1)}-${pad(today.getDate())}`);
-        setFuPopupTime(""); setFuPopupNote("");
+        setFuPopupDate(""); setFuPopupTime(""); setFuPopupNote("");
         setFuPopupOpen(true);
       }
     }

@@ -3,6 +3,7 @@
 import { GoogleAuth } from "google-auth-library";
 import { supa } from "@/lib/supabaseAdmin";
 import { normalizeEmail } from "@/lib/leads";
+import { greenApiUrl } from "@/lib/greenApi";
 
 const REGEV_CAL = process.env.MEETINGS_CALENDAR_USER || "liorrubin3@gmail.com";
 const TZ = "Asia/Jerusalem";
@@ -65,7 +66,7 @@ async function sendWhatsapp(phone: string, message: string): Promise<string> {
   const inst = process.env.GREENAPI_INSTANCE, tok = process.env.GREENAPI_TOKEN;
   if (!inst || !tok) throw new Error("חסרים פרטי GreenAPI (env)");
   const chatId = `${String(phone).replace(/\D/g, "")}@c.us`;
-  const url = `https://api.green-api.com/waInstance${inst}/sendMessage/${tok}`;
+  const url = greenApiUrl(inst, tok, "sendMessage");
   // 3 ניסיונות — תקלת רשת רגעית מ-Vercel ל-GreenAPI לא תפיל תזכורת
   let lastErr = "";
   for (let attempt = 1; attempt <= 3; attempt++) {

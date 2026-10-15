@@ -1,6 +1,7 @@
 import { SECTIONS, isFieldVisible, type Answers } from "@/lib/formSchema";
 import { env } from "@/lib/firebaseAdmin";
 import { normalizeIsraeliPhone } from "@/lib/leads";
+import { greenApiBase } from "@/lib/greenApi";
 
 export { normalizeIsraeliPhone };
 
@@ -70,7 +71,7 @@ export function buildClientWhatsappMessage(opts: {
 export async function sendBusinessWhatsapp(input: { to?: string; text: string }): Promise<{ idMessage: string }> {
   const instance = env("GREENAPI_INSTANCE");
   const token = env("GREENAPI_TOKEN");
-  const base = (env("GREENAPI_BASE") || "https://api.green-api.com").replace(/\/+$/, "");
+  const base = greenApiBase(instance);
   if (!instance || !token) throw new Error("GreenAPI לא מוגדר (GREENAPI_INSTANCE / GREENAPI_TOKEN)");
 
   const chatId = toChatId(input.to || env("WHATSAPP_NOTIFY_TO") || DEFAULT_TO);

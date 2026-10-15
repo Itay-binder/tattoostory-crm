@@ -88,7 +88,7 @@ async function lookupPhone(db, email) {
 // ── שליחת ווצאפ דרך GreenAPI (סוכן רגב) ──
 async function sendWhatsapp(phone, message) {
   const chatId = `${String(phone).replace(/\D/g, "")}@c.us`;
-  const res = await fetch(`https://api.green-api.com/waInstance${GA_INSTANCE}/sendMessage/${GA_TOKEN}`, {
+  const res = await fetch(`https://${String(GA_INSTANCE).slice(0, 4)}.api.greenapi.com/waInstance${GA_INSTANCE}/sendMessage/${GA_TOKEN}`, {
     method: "POST", headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ chatId, message }),
   });

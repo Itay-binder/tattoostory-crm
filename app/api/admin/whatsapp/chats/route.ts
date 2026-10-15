@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import { verifyAdmin } from "@/lib/admin";
+import { greenApiBase } from "@/lib/greenApi";
 
 export const runtime = "nodejs";
 
-const BASE = `https://api.green-api.com/waInstance${process.env.GREENAPI_INSTANCE}`;
+const BASE = `${greenApiBase()}/waInstance${process.env.GREENAPI_INSTANCE}`;
 const TOKEN = process.env.GREENAPI_TOKEN;
 
 export async function GET(req: Request) {

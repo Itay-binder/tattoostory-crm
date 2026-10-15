@@ -199,6 +199,16 @@ node scripts/apply-migrations.mjs   # מריץ לפי סדר שם הקובץ, מ
   **כאן זה לא קרה** — התרחיש נשאר פעיל, ו-`/start` החזיר 422 "already running".
   לכן בודקים `isActive` לפני ואחרי במקום להניח.
 
+## ווצאפ — GreenAPI
+
+- **אינסטנס:** `7105326802` (Tattoo Story) · env: `GREENAPI_INSTANCE` / `GREENAPI_TOKEN`
+- **כתובת הבסיס נגזרת בקוד** ב-`lib/greenApi.ts`: `https://<4 ספרות ראשונות>.api.greenapi.com`.
+  ⚠️ **הדומיין הישן `api.green-api.com` מת (10/2026)** — נפתר ב-DNS לכתובת שלא מקבלת
+  חיבורים, ולכן קריאות נתקעות ב-timeout בלי שגיאה ברורה ונראה כאילו האינסטנס כבוי.
+  אפשר לעקוף דרך `GREENAPI_BASE` אם יחליפו שוב.
+- משמש את אינבוקס הווצאפ (`/admin/whatsapp`), `lib/notify.ts` ותזכורות הפגישות.
+- בדיקת מצב: `https://7105.api.greenapi.com/waInstance<id>/getStateInstance/<token>`
+
 ## גוצ'ות
 
 - ⚠️ **ה-GitHub integration לא מפעיל פריסות בפרויקט הזה.** `git push` לא מספיק —
